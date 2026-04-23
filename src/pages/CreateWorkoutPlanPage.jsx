@@ -1,0 +1,87 @@
+import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
+import { useWorkoutStore } from '../store/workoutStore';
+import { createEmptyPlanDays } from '../utils/plan';
+
+export default function CreateWorkoutPlanPage() {
+  const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const createPlan = useWorkoutStore((state) => state.createPlan);
+  const plan = useWorkoutStore((state) => state.plan);
+  const plans = useWorkoutStore((state) => state.plans);
+  const [planName, setPlanName] = useState(`Plan ${Math.max(plans.length + 1, 1)}`);
+  const [daysPerWeek, setDaysPerWeek] = useState(plan?.days_per_week || 4);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const previewDays = useMemo(() => createEmptyPlanDays(Number(daysPerWeek) || 1), [daysPerWeek]);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError('');
+
+    if (!planName.trim()) {
+      setError('Please give your workout plan a name.');
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      await createPlan(user.uid, planName, Number(daysPerWeek));
+      navigate('/', { replace: true });
+    } catch (submitError) {
+      setError(submitError.message || 'Unable to save your workout plan.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <section className="page-section">
+      <div className="section-header">
+        <div>
+          <p className="eyebrow">Plan Builder</p>
+          <h2>{plans.length > 0 ? 'Create another workout plan' : 'Create workout plan'}</h2>
+        </div>
+        <p className="muted">
+          Multiple named plans are stored inside one workout-plans document so cold loads stay within a tiny read budget.
+        </p>
+      </div>
+
+      <form className="panel stack-form" onSubmit={handleSubmit}>
+        <label>
+          <span>Plan name</span>
+          <input value={planName} onChange={(event) => setPlanName(event.target.value)} placeholder="Push Pull Legs" />
+        </label>
+
+        <label>
+          <span>Days per week</span>
+          <select value={daysPerWeek} onChange={(event) => setDaysPerWeek(event.target.value)}>
+            {[1, 2, 3, 4, 5, 6, 7].map((day) => (
+              <option key={day} value={day}>
+                {day}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <div className="preview-grid">
+          {previewDays.map((day) => (
+            <div key={day.day_number} className="mini-day-card">
+              <h3>Workout {day.day_number}</h3>
+              <p className="helper-text">Empty by default, so you only upload what matters.</p>
+            </div>
+          ))}
+        </div>
+
+        {error ? <p className="feedback-inline feedback-error">{error}</p> : null}
+
+        <button type="submit" className="primary-button" disabled={saving}>
+          {saving ? 'Saving plan...' : plans.length > 0 ? 'Create New Plan' : 'Create Plan'}
+        </button>
+      </form>
+    </section>
+  );
+}
