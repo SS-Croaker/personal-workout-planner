@@ -15,11 +15,9 @@ export default function Dashboard() {
   const showToast = useFeedbackStore((state) => state.showToast);
   const profile = useWorkoutStore((state) => state.profile);
   const plans = useWorkoutStore((state) => state.plans);
-  const activePlanId = useWorkoutStore((state) => state.activePlanId);
   const plan = useWorkoutStore((state) => state.plan);
   const loading = useWorkoutStore((state) => state.loading);
   const resetPlanProgress = useWorkoutStore((state) => state.resetPlanProgress);
-  const switchActivePlan = useWorkoutStore((state) => state.switchActivePlan);
   const deletePlan = useWorkoutStore((state) => state.deletePlan);
 
   useEffect(() => {
@@ -80,25 +78,14 @@ export default function Dashboard() {
     }
   };
 
-  const handleSwitchPlan = async (event) => {
-    const nextPlanId = event.target.value;
-    if (!nextPlanId || nextPlanId === activePlanId) {
-      return;
-    }
-
-    try {
-      await switchActivePlan(user.uid, nextPlanId);
-      showToast({
-        type: 'success',
-        message: 'You’re now viewing a different workout plan.',
-      });
-    } catch (error) {
-      showToast({
-        type: 'error',
-        message: error.message || 'We couldn’t switch workout plans right now.',
-      });
-    }
-  };
+  const totalExercisesInPlan = plan?.days.reduce((sum, day) => sum + day.exercises.length, 0) || 0;
+  const completedExercisesInPlan =
+    plan?.days.reduce(
+      (sum, day) => sum + day.exercises.filter((exercise) => exercise.completed).length,
+      0,
+    ) || 0;
+  const overallProgressPercent =
+    totalExercisesInPlan === 0 ? 0 : Math.round((completedExercisesInPlan / totalExercisesInPlan) * 100);
 
   const handleDeletePlan = async () => {
     if (!planPendingDelete) {
@@ -155,7 +142,11 @@ export default function Dashboard() {
             <StatCard label="BMI" value={profile.bmi || '--'} hint="Saved from your profile details." />
             <StatCard label="Height" value={`${profile.height_cm || '--'} cm`} />
             <StatCard label="Weight" value={`${profile.weight_kg || '--'} kg`} />
-            <StatCard label="Workout Days" value={plan?.days_per_week || 0} hint="" />
+            <StatCard
+              label="Workout Days"
+              value={plan?.days_per_week || 0}
+              hint={plan ? `${completedExercisesInPlan}/${totalExercisesInPlan} complete` : ''}
+            />
           </div>
         </div>
       </div>
@@ -173,32 +164,33 @@ export default function Dashboard() {
       ) : (
         <div className="panel dashboard-plan-panel">
           <div className="panel-header-row">
-            <div>
+            <div className="dashboard-plan-overview">
               <h3>Your Weekly Workout Plan</h3>
               <p className="helper-text">
-                Current plan: {plan.name} • {plan.days.length} workouts
+                Active plan: {plan.name} • {plan.days.length} workouts this week
               </p>
+              <div className="dashboard-plan-meta">
+                <span className="plan-badge">Current Plan</span>
+                <strong className="dashboard-progress-count">
+                  {completedExercisesInPlan}/{totalExercisesInPlan} exercises completed
+                </strong>
+              </div>
+              <div className="progress-track dashboard-progress-track" aria-hidden="true">
+                <div className="progress-fill" style={{ width: `${overallProgressPercent}%` }} />
+              </div>
             </div>
             <div className="plan-controls">
-              <label className="plan-selector">
-                <span className="helper-text">Choose a plan</span>
-                <select value={activePlanId || ''} onChange={handleSwitchPlan}>
-                  {plans.map((planOption) => (
-                    <option key={planOption.id} value={planOption.id}>
-                      {planOption.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <Link to="/create-plan" className="primary-button inline-button">
-                New Plan
-              </Link>
               <button type="button" className="secondary-button inline-button" onClick={handleResetPlan}>
                 Reset Progress
               </button>
-              <button type="button" className="secondary-button inline-button danger-button" onClick={openDeletePlanModal}>
-                Delete Plan
-              </button>
+              <div className="management-actions">
+                <Link to="/create-plan" className="subtle-action-link">
+                  New Plan
+                </Link>
+                <button type="button" className="text-button subtle-action-link danger-text" onClick={openDeletePlanModal}>
+                  Delete Plan
+                </button>
+              </div>
             </div>
           </div>
 
