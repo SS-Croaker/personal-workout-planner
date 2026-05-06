@@ -32,7 +32,7 @@ export default function CreateWorkoutPlanPage() {
       await createPlan(user.uid, planName, Number(daysPerWeek));
       navigate('/', { replace: true });
     } catch (submitError) {
-      setError(submitError.message || 'Unable to save your workout plan.');
+      setError(submitError.message || 'We couldn’t save your workout plan right now.');
     } finally {
       setSaving(false);
     }
@@ -42,11 +42,11 @@ export default function CreateWorkoutPlanPage() {
     <section className="page-section">
       <div className="section-header">
         <div>
-          <p className="eyebrow">Plan Builder</p>
-          <h2>{plans.length > 0 ? 'Create another workout plan' : 'Create workout plan'}</h2>
+          <p className="eyebrow">Workout Plans</p>
+          <h2>{plans.length > 0 ? 'Create a new workout plan' : 'Build your first workout plan'}</h2>
         </div>
         <p className="muted">
-          Multiple named plans are stored inside one workout-plans document so cold loads stay within a tiny read budget.
+          Give your plan a name, choose your training days, and start building with confidence.
         </p>
       </div>
 
@@ -71,7 +71,7 @@ export default function CreateWorkoutPlanPage() {
           {previewDays.map((day) => (
             <div key={day.day_number} className="mini-day-card">
               <h3>Workout {day.day_number}</h3>
-              <p className="helper-text">Empty by default, so you only upload what matters.</p>
+              <p className="helper-text">You can add exercises to this workout whenever you’re ready.</p>
             </div>
           ))}
         </div>
@@ -79,7 +79,7 @@ export default function CreateWorkoutPlanPage() {
         {error ? <p className="feedback-inline feedback-error">{error}</p> : null}
 
         <button type="submit" className="primary-button" disabled={saving}>
-          {saving ? 'Saving plan...' : plans.length > 0 ? 'Create New Plan' : 'Create Plan'}
+          {saving ? 'Saving your plan...' : plans.length > 0 ? 'Create New Plan' : 'Create Plan'}
         </button>
       </form>
     </section>

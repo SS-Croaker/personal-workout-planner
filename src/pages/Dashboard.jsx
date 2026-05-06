@@ -39,12 +39,12 @@ export default function Dashboard() {
       await resetPlanProgress(user.uid);
       showToast({
         type: 'success',
-        message: 'Workout progress reset. Your plan and exercises stayed intact.',
+        message: 'Progress cleared. Your workouts are ready for a fresh start.',
       });
     } catch (error) {
       showToast({
         type: 'error',
-        message: error.message || 'Unable to reset workout progress.',
+        message: error.message || 'We couldn’t reset your progress right now.',
       });
     }
   };
@@ -59,12 +59,12 @@ export default function Dashboard() {
       await switchActivePlan(user.uid, nextPlanId);
       showToast({
         type: 'success',
-        message: 'Active workout plan updated.',
+        message: 'You’re now viewing a different workout plan.',
       });
     } catch (error) {
       showToast({
         type: 'error',
-        message: error.message || 'Unable to switch workout plans.',
+        message: error.message || 'We couldn’t switch workout plans right now.',
       });
     }
   };
@@ -74,15 +74,15 @@ export default function Dashboard() {
       <div className="section-header">
         <div>
           <p className="eyebrow">Dashboard</p>
-          <h2>Hello, {profile.name}</h2>
+          <h2>Welcome back, {profile.name}. Let’s get to work.</h2>
         </div>
         <p className="muted">
-          Your workouts are ready. Let’s get moving.
+          Your weekly plan is lined up and ready when you are.
         </p>
       </div>
 
       <div className="stats-grid">
-        <StatCard label="BMI" value={profile.bmi || '--'} hint="Calculated once on profile save." />
+        <StatCard label="BMI" value={profile.bmi || '--'} hint="Saved from your profile details." />
         <StatCard label="Height" value={`${profile.height_cm || '--'} cm`} />
         <StatCard label="Weight" value={`${profile.weight_kg || '--'} kg`} />
         <StatCard label="Workout Days" value={plan?.days_per_week || 0} hint="" />
@@ -90,9 +90,9 @@ export default function Dashboard() {
 
       {!plan ? (
         <div className="panel empty-state">
-          <h3>No workout plan yet</h3>
+          <h3>Your first workout plan starts here</h3>
           <p className="muted">
-            Create one plan document for the whole week, then edit individual days locally before saving.
+            Build out your week, add your exercises, and give yourself a clear plan to follow.
           </p>
           <Link to="/create-plan" className="primary-button inline-button">
             Create Workout Plan
@@ -104,12 +104,12 @@ export default function Dashboard() {
             <div>
               <h3>Your Weekly Workout Plan</h3>
               <p className="helper-text">
-                Active plan: {plan.name} • {plan.days.length} workouts
+                Current plan: {plan.name} • {plan.days.length} workouts
               </p>
             </div>
             <div className="plan-controls">
               <label className="plan-selector">
-                <span className="helper-text">Active plan</span>
+                <span className="helper-text">Choose a plan</span>
                 <select value={activePlanId || ''} onChange={handleSwitchPlan}>
                   {plans.map((planOption) => (
                     <option key={planOption.id} value={planOption.id}>
@@ -172,7 +172,7 @@ export default function Dashboard() {
                           </span>
                         </li>
                       ))}
-                      {day.exercises.length === 0 ? <li>No exercises added yet.</li> : null}
+                      {day.exercises.length === 0 ? <li>Add your first exercise to get started.</li> : null}
                     </ul>
                     <div className="day-card-actions">
                       <button type="button" className="primary-button inline-button" onClick={() => handleViewDay(day.day_number)}>

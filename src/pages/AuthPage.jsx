@@ -37,17 +37,17 @@ export default function AuthPage() {
     <div className="centered-page">
       <div className="auth-card">
         <p className="eyebrow">Personal Workout Planner</p>
-        <h1>{mode === 'login' ? 'Welcome back' : 'Create your account'}</h1>
+        <h1>{mode === 'login' ? 'Welcome back' : 'Start your training plan'}</h1>
         <p className="muted">
-          Your workouts are private and saved just for you.
+          Keep your workouts in one place and stay focused on your next session.
         </p>
 
         <div className="segmented-control">
           <button type="button" className={mode === 'login' ? 'active' : ''} onClick={() => setMode('login')}>
-            Login
+            Sign In
           </button>
           <button type="button" className={mode === 'register' ? 'active' : ''} onClick={() => setMode('register')}>
-            Register
+            Get Started
           </button>
         </div>
 
@@ -83,14 +83,14 @@ export default function AuthPage() {
               minLength={6}
               value={form.password}
               onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
-              placeholder="Minimum 6 characters"
+              placeholder="At least 6 characters"
             />
           </label>
 
           {error ? <p className="error-text">{error}</p> : null}
 
           <button type="submit" className="primary-button" disabled={loading}>
-            {loading ? 'Please wait...' : mode === 'login' ? 'Sign In' : 'Create Account'}
+            {loading ? 'Just a moment...' : mode === 'login' ? 'Sign In' : 'Create My Account'}
           </button>
         </form>
       </div>

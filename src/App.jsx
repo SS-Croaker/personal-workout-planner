@@ -48,7 +48,7 @@ function AppRoutes() {
   }, [authReady, bootstrapped, clearWorkoutState, hydrateFromCloud, sessionUid, user]);
 
   if (!authReady || (user && loading && !bootstrapped)) {
-    return <Loader fullScreen label="Loading your workout data..." />;
+    return <Loader fullScreen label="Getting your workouts ready..." />;
   }
 
   return (

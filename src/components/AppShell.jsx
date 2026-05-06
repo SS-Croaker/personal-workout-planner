@@ -14,25 +14,25 @@ export default function AppShell() {
       <aside className="sidebar">
         <div>
           <p className="eyebrow">Personal Workout Planner</p>
-          <h1>Plan your workouts. Track your progress. Stay consistent.</h1>
+          <h1>Plan your workouts. Track your progress.</h1>
           <p className="muted">
-            Your profile and workouts are saved and ready whenever you are.
+            Everything you need is right here when you're ready to train.
           </p>
         </div>
 
         <nav className="nav-links">
           <NavLink to="/">Dashboard</NavLink>
-          <NavLink to="/profile-setup">{profile ? 'Edit Profile' : 'Profile Setup'}</NavLink>
-          <NavLink to="/create-plan">{plan ? 'Reset Plan' : 'Create Plan'}</NavLink>
+          <NavLink to="/profile-setup">{profile ? 'Your Profile' : 'Set Up Profile'}</NavLink>
+          <NavLink to="/create-plan">{plan ? 'New Plan' : 'Create Plan'}</NavLink>
         </nav>
 
         <div className="sidebar-footer">
           <div className="status-chip">
             <span className="status-dot" />
-            <span>{location.pathname === '/' ? 'You’re all set' : 'Editing locally'}</span>
+            <span>{location.pathname === '/' ? 'Ready when you are' : 'Workout in progress'}</span>
           </div>
           <button type="button" className="secondary-button" onClick={signOutUser}>
-            Log Out
+            Sign Out
           </button>
         </div>
       </aside>

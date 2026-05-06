@@ -147,8 +147,8 @@ export default function DayEditor() {
     return (
       <section className="page-section">
         <div className="panel">
-          <h3>Preparing day {selectedDay.day_number}...</h3>
-          <p className="muted">Loading your cached workout editor.</p>
+          <h3>Getting Workout {selectedDay.day_number} ready...</h3>
+          <p className="muted">Pulling everything into place so you can keep building.</p>
         </div>
       </section>
     );
@@ -213,7 +213,7 @@ export default function DayEditor() {
     });
 
     if (partialExerciseIndex !== -1) {
-      setError(`Exercise ${partialExerciseIndex + 1} needs a name before you save.`);
+      setError(`Add a name for exercise ${partialExerciseIndex + 1} before you save.`);
       return;
     }
 
@@ -222,7 +222,7 @@ export default function DayEditor() {
     );
 
     if (invalidWeightIndex !== -1) {
-      setError(`Exercise ${invalidWeightIndex + 1} has an invalid weight.`);
+      setError(`Check the weight for exercise ${invalidWeightIndex + 1} and try again.`);
       return;
     }
 
@@ -232,11 +232,11 @@ export default function DayEditor() {
       await saveWorkoutDay(user.uid, draft.day_number, draft.exercises);
       showToast({
         type: 'success',
-        message: `Workout ${draft.day_number} saved successfully.`,
+        message: `Workout ${draft.day_number} is saved and ready.`,
       });
       navigate(`/day/${draft.day_number}`, { replace: true });
     } catch (saveError) {
-      const message = saveError.message || 'Unable to save your workout.';
+      const message = saveError.message || 'We couldn’t save your workout right now.';
       setError(message);
       showToast({
         type: 'error',
@@ -255,7 +255,7 @@ export default function DayEditor() {
           <h2>Workout {selectedDay.day_number}</h2>
         </div>
         <p className="muted">
-          Changes stay local until you press save, then the app uploads any compressed images and writes the whole plan once.
+          Build out this workout, dial in the details, and save when everything looks right.
         </p>
       </div>
 
@@ -284,15 +284,15 @@ export default function DayEditor() {
               onRemove={removeExercise}
             />
             <p className="helper-text">
-              Selected type: {getExerciseTypeLabel(exercise.type)} | Equipment: {getExerciseEquipmentLabel(exercise.equipment)} | Weight: {formatExerciseWeight(exercise.weight, exercise.weight_unit)}
+              Focus: {getExerciseTypeLabel(exercise.type)} | Equipment: {getExerciseEquipmentLabel(exercise.equipment)} | Weight: {formatExerciseWeight(exercise.weight, exercise.weight_unit)}
             </p>
           </div>
         ))}
 
         {draft.exercises.length === 0 ? (
           <div className="panel empty-state">
-            <h3>No exercises for this workout yet</h3>
-            <p className="muted">Add only the exercises you need so your plan document stays small and focused.</p>
+            <h3>Start building your workout</h3>
+            <p className="muted">Add your first exercise to get this session moving.</p>
           </div>
         ) : null}
 
@@ -308,7 +308,7 @@ export default function DayEditor() {
       {saving ? <p className="feedback-inline feedback-info">Saving your workout...</p> : null}
 
       <button type="button" className="primary-button" disabled={saving} onClick={handleSave}>
-        {saving ? 'Saving workout...' : 'Save Workout'}
+        {saving ? 'Saving your workout...' : 'Save Workout'}
       </button>
     </section>
   );

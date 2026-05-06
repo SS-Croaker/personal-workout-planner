@@ -48,9 +48,9 @@ export default function DayView() {
 
     try {
       await toggleExerciseCompletion(user.uid, selectedDay.day_number, exerciseIndex, completed);
-      setCompletionNotice(completed ? 'Exercise marked complete.' : 'Exercise marked incomplete.');
+      setCompletionNotice(completed ? 'Nice work. Exercise completed.' : 'Exercise marked as not completed.');
     } catch (toggleError) {
-      const message = toggleError.message || 'Unable to update exercise status.';
+      const message = toggleError.message || 'We couldn’t update this exercise right now.';
       setError(message);
       showToast({
         type: 'error',
@@ -67,7 +67,7 @@ export default function DayView() {
           <h2>Workout {selectedDay.day_number}</h2>
         </div>
         <p className="muted">
-          {completedCount}/{totalExercises} exercises completed. Updates are saved from cached state without reloading the page.
+          {completedCount}/{totalExercises} exercises completed. Keep the momentum going.
         </p>
       </div>
 
@@ -86,7 +86,7 @@ export default function DayView() {
 
       <div className="editor-toolbar">
         <Link to="/" className="secondary-button inline-button">
-          Back to Dashboard
+          Back to Your Plan
         </Link>
         <Link to={`/day/${selectedDay.day_number}/edit`} className="primary-button inline-button">
           Edit Workout
@@ -96,8 +96,8 @@ export default function DayView() {
       <div className="panel">
         {selectedDay.exercises.length === 0 ? (
           <div className="empty-state">
-            <h3>No exercises added yet</h3>
-            <p className="muted">Open the editor to add exercises for this workout.</p>
+            <h3>Start building your workout</h3>
+            <p className="muted">Add your first exercise and make this session your own.</p>
           </div>
         ) : (
           <div className="day-view-list">

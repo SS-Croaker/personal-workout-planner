@@ -81,11 +81,11 @@ export default function ProfileSetupPage() {
       });
       showToast({
         type: 'success',
-        message: 'Profile saved successfully.',
+        message: 'Your profile is saved and ready to go.',
       });
       navigate('/', { replace: true });
     } catch (submitError) {
-      const message = submitError.message || 'Unable to save your profile.';
+      const message = submitError.message || 'We couldn’t save your profile right now.';
       setError(message);
       showToast({
         type: 'error',
@@ -100,11 +100,11 @@ export default function ProfileSetupPage() {
     <section className="page-section narrow-page">
       <div className="section-header">
         <div>
-          <p className="eyebrow">Profile Setup</p>
-          <h2>Your training profile</h2>
+          <p className="eyebrow">Your Profile</p>
+          <h2>Set up your fitness details</h2>
         </div>
         <p className="muted">
-          Your BMI is saved and helps you stay on track with your fitness goals.
+          Add a few details so your workout plan feels tailored to you.
         </p>
       </div>
 
@@ -159,7 +159,7 @@ export default function ProfileSetupPage() {
         {saving ? <p className="feedback-inline feedback-info">Saving your profile...</p> : null}
 
         <button type="submit" className="primary-button" disabled={saving}>
-          {saving ? 'Saving profile...' : 'Save Profile'}
+          {saving ? 'Saving your profile...' : 'Save Profile'}
         </button>
       </form>
     </section>
