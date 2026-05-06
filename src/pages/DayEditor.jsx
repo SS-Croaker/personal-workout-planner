@@ -9,6 +9,8 @@ import {
   formatExerciseWeight,
   getExerciseEquipmentLabel,
   getExerciseTypeLabel,
+  normalizeWorkoutTitle,
+  WORKOUT_NAME_SUGGESTIONS,
 } from '../utils/plan';
 
 const COMMON_EXERCISES = [
@@ -106,6 +108,7 @@ export default function DayEditor() {
     if (selectedDay) {
       setDraft({
         day_number: selectedDay.day_number,
+        title: normalizeWorkoutTitle(selectedDay.title, selectedDay.day_number),
         exercises: selectedDay.exercises.map((exercise) => ({ ...exercise })),
       });
       return;
@@ -229,10 +232,10 @@ export default function DayEditor() {
     setSaving(true);
 
     try {
-      await saveWorkoutDay(user.uid, draft.day_number, draft.exercises);
+      await saveWorkoutDay(user.uid, draft.day_number, draft.exercises, draft.title);
       showToast({
         type: 'success',
-        message: `Workout ${draft.day_number} is saved and ready.`,
+        message: `${normalizeWorkoutTitle(draft.title, draft.day_number)} is saved and ready.`,
       });
       navigate(`/day/${draft.day_number}`, { replace: true });
     } catch (saveError) {
@@ -252,7 +255,7 @@ export default function DayEditor() {
       <div className="section-header">
         <div>
           <p className="eyebrow">Workout Editor</p>
-          <h2>Workout {selectedDay.day_number}</h2>
+          <h2>{normalizeWorkoutTitle(draft.title, selectedDay.day_number)}</h2>
         </div>
         <p className="muted">
           Build out this workout, dial in the details, and save when everything looks right.
@@ -263,6 +266,24 @@ export default function DayEditor() {
         <Link to={`/day/${selectedDay.day_number}`} className="secondary-button inline-button">
           Back to Workout View
         </Link>
+      </div>
+
+      <div className="panel stack-form">
+        <label>
+          <span>Workout title</span>
+          <input
+            value={draft.title}
+            onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
+            placeholder="Push Day"
+            list="workout-title-suggestions"
+          />
+          <datalist id="workout-title-suggestions">
+            {WORKOUT_NAME_SUGGESTIONS.map((suggestion) => (
+              <option key={suggestion} value={suggestion} />
+            ))}
+          </datalist>
+          <p className="helper-text">Give this workout a name you’ll recognize instantly.</p>
+        </label>
       </div>
 
       <div className="stack-list">

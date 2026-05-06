@@ -4,7 +4,7 @@ import StatCard from '../components/StatCard';
 import { useAuthStore } from '../store/authStore';
 import { useFeedbackStore } from '../store/feedbackStore';
 import { useWorkoutStore } from '../store/workoutStore';
-import { formatExerciseWeight } from '../utils/plan';
+import { formatExerciseWeight, normalizeWorkoutTitle } from '../utils/plan';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -223,7 +223,7 @@ export default function Dashboard() {
                         <div className="workout-accordion-header">
                           <div className="workout-accordion-heading">
                             <p className="eyebrow">Workout {day.day_number}</p>
-                            <h3>{totalExercises} exercises</h3>
+                            <h3>{normalizeWorkoutTitle(day.title, day.day_number)}</h3>
                           </div>
                           <div className="workout-accordion-summary">
                             <strong>{completedCount}/{totalExercises} completed</strong>

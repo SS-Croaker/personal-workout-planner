@@ -8,6 +8,7 @@ import {
   normalizeExercise,
   normalizeExerciseEquipment,
   normalizeExerciseType,
+  normalizeWorkoutTitle,
   normalizeWeightUnit,
   normalizeWorkoutPlansDoc,
 } from '../utils/plan';
@@ -89,7 +90,7 @@ export const useWorkoutStore = create(
         });
       },
 
-      saveWorkoutDay: async (uid, dayNumber, exercises) => {
+      saveWorkoutDay: async (uid, dayNumber, exercises, workoutTitle) => {
         const currentPlan = get().plan;
         const currentPlans = get().plans;
         const activePlanId = get().activePlanId;
@@ -129,6 +130,7 @@ export const useWorkoutStore = create(
 
           nextDays.push({
             ...day,
+            title: normalizeWorkoutTitle(workoutTitle, dayNumber),
             exercises: nextExercises,
           });
         }

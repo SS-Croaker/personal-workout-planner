@@ -20,6 +20,17 @@ export const WEIGHT_UNITS = [
   { value: 'lbs', label: 'lbs' },
 ];
 
+export const WORKOUT_NAME_SUGGESTIONS = [
+  'Push Day',
+  'Pull Day',
+  'Leg Day',
+  'Chest Day',
+  'Upper Body',
+  'Lower Body',
+  'Conditioning',
+  'Recovery',
+];
+
 export function normalizeExerciseCompletion(completed) {
   return Boolean(completed);
 }
@@ -115,8 +126,13 @@ export function normalizeExercise(exercise) {
 export function createEmptyPlanDays(daysPerWeek) {
   return Array.from({ length: daysPerWeek }, (_, index) => ({
     day_number: index + 1,
+    title: WORKOUT_NAME_SUGGESTIONS[index] || `Workout ${index + 1}`,
     exercises: [],
   }));
+}
+
+export function normalizeWorkoutTitle(title, dayNumber) {
+  return title?.trim() || `Workout ${dayNumber}`;
 }
 
 function createPlanId() {
@@ -145,6 +161,7 @@ export function normalizePlan(plan) {
     days: Array.isArray(plan.days)
       ? plan.days.map((day) => ({
           ...day,
+          title: normalizeWorkoutTitle(day?.title, day?.day_number),
           exercises: Array.isArray(day.exercises)
             ? day.exercises.map((exercise) => normalizeExercise(exercise))
             : [],

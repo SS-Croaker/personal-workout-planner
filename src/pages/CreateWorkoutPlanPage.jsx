@@ -70,7 +70,7 @@ export default function CreateWorkoutPlanPage() {
         <div className="preview-grid">
           {previewDays.map((day) => (
             <div key={day.day_number} className="mini-day-card">
-              <h3>Workout {day.day_number}</h3>
+              <h3>{day.title}</h3>
               <p className="helper-text">You can add exercises to this workout whenever you’re ready.</p>
             </div>
           ))}

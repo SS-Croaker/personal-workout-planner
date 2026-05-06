@@ -6,6 +6,7 @@ import { useWorkoutStore } from '../store/workoutStore';
 import {
   formatExerciseWeight,
   getExerciseEquipmentLabel,
+  normalizeWorkoutTitle,
 } from '../utils/plan';
 
 export default function DayView() {
@@ -30,6 +31,7 @@ export default function DayView() {
   const completedCount = selectedDay.exercises.filter((exercise) => exercise.completed).length;
   const totalExercises = selectedDay.exercises.length;
   const progressPercent = totalExercises === 0 ? 0 : Math.round((completedCount / totalExercises) * 100);
+  const workoutTitle = normalizeWorkoutTitle(selectedDay.title, selectedDay.day_number);
 
   useEffect(() => {
     if (!completionNotice) {
@@ -64,14 +66,14 @@ export default function DayView() {
       <div className="section-header">
         <div>
           <p className="eyebrow">Workout View</p>
-          <h2>Workout {selectedDay.day_number}</h2>
+          <h2>{workoutTitle}</h2>
         </div>
         <p className="muted">
           {completedCount}/{totalExercises} exercises completed. Keep the momentum going.
         </p>
       </div>
 
-      <div className="panel progress-panel">
+      <div className="panel progress-panel workout-focus-panel">
         <div className="progress-row">
           <strong>
             Progress: {completedCount}/{totalExercises}
@@ -84,16 +86,16 @@ export default function DayView() {
         {completionNotice ? <p className="feedback-inline feedback-success subtle-feedback">{completionNotice}</p> : null}
       </div>
 
-      <div className="editor-toolbar">
+      <div className="editor-toolbar workout-view-toolbar">
         <Link to="/" className="secondary-button inline-button">
-          Back to Your Plan
+          Back to Weekly Plan
         </Link>
-        <Link to={`/day/${selectedDay.day_number}/edit`} className="primary-button inline-button">
+        <Link to={`/day/${selectedDay.day_number}/edit`} className="secondary-button inline-button workout-view-edit-button">
           Edit Workout
         </Link>
       </div>
 
-      <div className="panel">
+      <div className="panel workout-exercises-panel">
         {selectedDay.exercises.length === 0 ? (
           <div className="empty-state">
             <h3>Start building your workout</h3>
