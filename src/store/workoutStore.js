@@ -294,6 +294,49 @@ export const useWorkoutStore = create(
         }
       },
 
+      deletePlan: async (uid, planId) => {
+        const currentPlans = get().plans;
+        const currentActivePlanId = get().activePlanId;
+        const planToDelete = currentPlans.find((plan) => plan.id === planId);
+
+        if (!planToDelete) {
+          throw new Error('Workout plan not found.');
+        }
+
+        const previousPlans = currentPlans;
+        const previousActivePlanId = currentActivePlanId;
+        const nextPlans = currentPlans.filter((plan) => plan.id !== planId);
+        const fallbackActivePlanId =
+          currentActivePlanId === planId
+            ? nextPlans[0]?.id || null
+            : currentActivePlanId;
+        const payload = buildWorkoutPlansPayload(nextPlans, fallbackActivePlanId);
+
+        set({
+          plans: payload.plans,
+          activePlanId: fallbackActivePlanId,
+          plan: payload.plans.find((plan) => plan.id === fallbackActivePlanId) || null,
+          sessionUid: uid,
+          bootstrapped: true,
+          hydratedThisSession: true,
+        });
+
+        try {
+          await dbService.saveWorkoutPlans(uid, payload);
+        } catch (error) {
+          const rollback = buildWorkoutPlansPayload(previousPlans, previousActivePlanId);
+          set({
+            plans: rollback.plans,
+            activePlanId: previousActivePlanId,
+            plan: rollback.plans.find((plan) => plan.id === previousActivePlanId) || null,
+            sessionUid: uid,
+            bootstrapped: true,
+            hydratedThisSession: true,
+          });
+          throw error;
+        }
+      },
+
       clearWorkoutState: () =>
         set({
           profile: null,

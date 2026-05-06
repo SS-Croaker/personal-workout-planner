@@ -298,6 +298,16 @@ img {
   border: 1px solid var(--border);
 }
 
+.danger-button {
+  color: var(--danger);
+  border-color: rgba(183, 57, 57, 0.22);
+  background: #fff7f7;
+}
+
+.danger-solid-button {
+  background: linear-gradient(135deg, #c64949, #992f2f);
+}
+
 .inline-button {
   display: inline-flex;
   align-items: center;
@@ -358,6 +368,34 @@ img {
   flex-shrink: 0;
 }
 
+.icon-button {
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 120ms ease, background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.icon-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.icon-button:hover,
+.icon-button:focus-visible {
+  background: var(--panel-soft);
+  color: var(--accent-strong);
+  border-color: rgba(36, 84, 59, 0.2);
+}
+
 .clickable-card:focus-visible {
   outline: 3px solid rgba(36, 84, 59, 0.28);
   outline-offset: 3px;
@@ -410,6 +448,10 @@ img {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.workout-card-edit-button {
+  margin-left: auto;
 }
 
 .plan-controls {
@@ -672,6 +714,40 @@ img {
   white-space: nowrap;
 }
 
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1001;
+  padding: 20px;
+  display: grid;
+  place-items: center;
+  background: rgba(18, 27, 21, 0.52);
+}
+
+.modal-card {
+  width: min(480px, calc(100vw - 32px));
+  padding: 22px;
+  border-radius: 22px;
+  border: 1px solid rgba(216, 228, 215, 0.95);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 28px 60px rgba(17, 29, 21, 0.24);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-card h3,
+.modal-card p {
+  margin: 0;
+}
+
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 6px;
+}
+
 .loader-spinner {
   width: 20px;
   height: 20px;
@@ -718,6 +794,11 @@ img {
   .segmented-control button,
   .inline-button {
     width: auto;
+  }
+
+  .modal-actions {
+    flex-direction: row;
+    justify-content: flex-end;
   }
 
   .stats-grid,

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import StatCard from '../components/StatCard';
 import { useAuthStore } from '../store/authStore';
@@ -9,6 +9,8 @@ import { formatExerciseWeight } from '../utils/plan';
 export default function Dashboard() {
   const navigate = useNavigate();
   const [statsOpen, setStatsOpen] = useState(false);
+  const [planPendingDelete, setPlanPendingDelete] = useState(null);
+  const [deletingPlan, setDeletingPlan] = useState(false);
   const user = useAuthStore((state) => state.user);
   const showToast = useFeedbackStore((state) => state.showToast);
   const profile = useWorkoutStore((state) => state.profile);
@@ -18,6 +20,25 @@ export default function Dashboard() {
   const loading = useWorkoutStore((state) => state.loading);
   const resetPlanProgress = useWorkoutStore((state) => state.resetPlanProgress);
   const switchActivePlan = useWorkoutStore((state) => state.switchActivePlan);
+  const deletePlan = useWorkoutStore((state) => state.deletePlan);
+
+  useEffect(() => {
+    if (!planPendingDelete) {
+      return undefined;
+    }
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape' && !deletingPlan) {
+        setPlanPendingDelete(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+
+    return () => {
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [deletingPlan, planPendingDelete]);
 
   if (loading && !profile) {
     return null;
@@ -34,6 +55,14 @@ export default function Dashboard() {
   const handleEditDay = (event, dayNumber) => {
     event.stopPropagation();
     navigate(`/day/${dayNumber}/edit`);
+  };
+
+  const openDeletePlanModal = () => {
+    if (!plan) {
+      return;
+    }
+
+    setPlanPendingDelete(plan);
   };
 
   const handleResetPlan = async () => {
@@ -68,6 +97,34 @@ export default function Dashboard() {
         type: 'error',
         message: error.message || 'We couldn’t switch workout plans right now.',
       });
+    }
+  };
+
+  const handleDeletePlan = async () => {
+    if (!planPendingDelete) {
+      return;
+    }
+
+    setDeletingPlan(true);
+
+    try {
+      const remainingPlanCount = plans.length - 1;
+      await deletePlan(user.uid, planPendingDelete.id);
+      showToast({
+        type: 'success',
+        message:
+          remainingPlanCount > 0
+            ? 'Workout plan deleted. Your next plan is ready.'
+            : 'Workout plan deleted. You can build a new one whenever you’re ready.',
+      });
+      setPlanPendingDelete(null);
+    } catch (error) {
+      showToast({
+        type: 'error',
+        message: error.message || 'We couldn’t delete this workout plan right now.',
+      });
+    } finally {
+      setDeletingPlan(false);
     }
   };
 
@@ -139,6 +196,9 @@ export default function Dashboard() {
               <button type="button" className="secondary-button inline-button" onClick={handleResetPlan}>
                 Reset Progress
               </button>
+              <button type="button" className="secondary-button inline-button danger-button" onClick={openDeletePlanModal}>
+                Delete Plan
+              </button>
             </div>
           </div>
 
@@ -171,6 +231,32 @@ export default function Dashboard() {
                           {completedCount}/{totalExercises} completed
                         </p>
                       </div>
+                      <button
+                        type="button"
+                        className="icon-button workout-card-edit-button"
+                        onClick={(event) => handleEditDay(event, day.day_number)}
+                        aria-label={`Edit Workout ${day.day_number}`}
+                        title="Edit Workout"
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path
+                            d="M4 20h4l10.5-10.5a1.4 1.4 0 0 0 0-2L16.5 5.5a1.4 1.4 0 0 0-2 0L4 16v4Z"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="m13.5 6.5 4 4"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </button>
                     </div>
                     <div className="mini-progress-track" aria-hidden="true">
                       <div className="mini-progress-fill" style={{ width: `${progressPercent}%` }} />
@@ -191,14 +277,7 @@ export default function Dashboard() {
                     </ul>
                     <div className="day-card-actions">
                       <button type="button" className="primary-button inline-button" onClick={() => handleViewDay(day.day_number)}>
-                        View All
-                      </button>
-                      <button
-                        type="button"
-                        className="secondary-button inline-button"
-                        onClick={(event) => handleEditDay(event, day.day_number)}
-                      >
-                        Edit Workout
+                        View Workout
                       </button>
                     </div>
                   </article>
@@ -208,6 +287,47 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {planPendingDelete ? (
+        <div className="modal-overlay" role="presentation" onClick={() => (deletingPlan ? null : setPlanPendingDelete(null))}>
+          <div
+            className="modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-plan-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <p className="eyebrow">Delete Plan</p>
+            <h3 id="delete-plan-title">Delete “{planPendingDelete.name}”?</h3>
+            <p className="muted">
+              This will permanently remove the plan, its workouts, and its progress. This action can’t be undone.
+            </p>
+            <p className="helper-text">
+              {plans.length > 1
+                ? 'If this is your current plan, we’ll switch you to another one automatically.'
+                : 'You’ll return to an empty planner and can create a new plan anytime.'}
+            </p>
+            <div className="modal-actions">
+              <button
+                type="button"
+                className="secondary-button inline-button"
+                onClick={() => setPlanPendingDelete(null)}
+                disabled={deletingPlan}
+              >
+                Keep Plan
+              </button>
+              <button
+                type="button"
+                className="primary-button inline-button danger-solid-button"
+                onClick={handleDeletePlan}
+                disabled={deletingPlan}
+              >
+                {deletingPlan ? 'Deleting plan...' : 'Delete Plan'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
