@@ -9,6 +9,7 @@ import { formatExerciseWeight } from '../utils/plan';
 export default function Dashboard() {
   const navigate = useNavigate();
   const [statsOpen, setStatsOpen] = useState(false);
+  const [expandedWorkout, setExpandedWorkout] = useState(null);
   const [planPendingDelete, setPlanPendingDelete] = useState(null);
   const [deletingPlan, setDeletingPlan] = useState(false);
   const user = useAuthStore((state) => state.user);
@@ -53,6 +54,10 @@ export default function Dashboard() {
   const handleEditDay = (event, dayNumber) => {
     event.stopPropagation();
     navigate(`/day/${dayNumber}/edit`);
+  };
+
+  const toggleWorkoutCard = (dayNumber) => {
+    setExpandedWorkout((current) => (current === dayNumber ? null : dayNumber));
   };
 
   const openDeletePlanModal = () => {
@@ -197,6 +202,7 @@ export default function Dashboard() {
           <div className="day-grid">
             {plan.days.map((day) => (
               (() => {
+                const isExpanded = expandedWorkout === day.day_number;
                 const completedCount = day.exercises.filter((exercise) => exercise.completed).length;
                 const totalExercises = day.exercises.length;
                 const progressPercent = totalExercises === 0 ? 0 : Math.round((completedCount / totalExercises) * 100);
@@ -204,25 +210,47 @@ export default function Dashboard() {
                 return (
                   <article
                     key={day.day_number}
-                    className="day-card clickable-card"
-                    onClick={() => handleViewDay(day.day_number)}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault();
-                        handleViewDay(day.day_number);
-                      }
-                    }}
-                    role="button"
-                    tabIndex={0}
+                    className={`day-card workout-accordion-card ${isExpanded ? 'workout-accordion-card-open' : ''}`}
                   >
-                    <div className="day-card-header">
-                      <div>
-                        <p className="eyebrow">Workout {day.day_number}</p>
-                        <h3>{day.exercises.length} exercises</h3>
-                        <p className="helper-text day-progress-copy">
-                          {completedCount}/{totalExercises} completed
-                        </p>
-                      </div>
+                    <div className="day-card-topbar">
+                      <button
+                        type="button"
+                        className="workout-accordion-toggle"
+                        onClick={() => toggleWorkoutCard(day.day_number)}
+                        aria-expanded={isExpanded}
+                        aria-controls={`workout-card-panel-${day.day_number}`}
+                      >
+                        <div className="workout-accordion-header">
+                          <div className="workout-accordion-heading">
+                            <p className="eyebrow">Workout {day.day_number}</p>
+                            <h3>{totalExercises} exercises</h3>
+                          </div>
+                          <div className="workout-accordion-summary">
+                            <strong>{completedCount}/{totalExercises} completed</strong>
+                            <span className="helper-text">
+                              {progressPercent}% done
+                            </span>
+                          </div>
+                        </div>
+                        <div className="mini-progress-track workout-accordion-progress" aria-hidden="true">
+                          <div className="mini-progress-fill" style={{ width: `${progressPercent}%` }} />
+                        </div>
+                        <div className="workout-accordion-meta">
+                          <span className="helper-text">{totalExercises} total exercises</span>
+                          <span className={`accordion-chevron ${isExpanded ? 'accordion-chevron-open' : ''}`} aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                              <path
+                                d="m6 9 6 6 6-6"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </span>
+                        </div>
+                      </button>
                       <button
                         type="button"
                         className="icon-button workout-card-edit-button"
@@ -250,27 +278,36 @@ export default function Dashboard() {
                         </svg>
                       </button>
                     </div>
-                    <div className="mini-progress-track" aria-hidden="true">
-                      <div className="mini-progress-fill" style={{ width: `${progressPercent}%` }} />
-                    </div>
-                    <ul className="exercise-summary-list">
-                      {day.exercises.slice(0, 3).map((exercise, index) => (
-                        <li
-                          key={`${exercise.name}-${index}`}
-                          className={`exercise-preview-row ${exercise.completed ? 'exercise-preview-row-complete' : ''}`}
-                        >
-                          <span className="exercise-preview-name">{exercise.name || 'Unnamed exercise'}</span>
-                          <span className="exercise-preview-weight">
-                            {formatExerciseWeight(exercise.weight, exercise.weight_unit)}
-                          </span>
-                        </li>
-                      ))}
-                      {day.exercises.length === 0 ? <li>Add your first exercise to get started.</li> : null}
-                    </ul>
-                    <div className="day-card-actions">
-                      <button type="button" className="primary-button inline-button" onClick={() => handleViewDay(day.day_number)}>
-                        View Workout
-                      </button>
+                    <div
+                      id={`workout-card-panel-${day.day_number}`}
+                      className={`workout-accordion-panel ${isExpanded ? 'workout-accordion-panel-open' : ''}`}
+                    >
+                      <div className="workout-accordion-panel-inner">
+                        <ul className="exercise-summary-list">
+                          {day.exercises.slice(0, 3).map((exercise, index) => (
+                            <li
+                              key={`${exercise.name}-${index}`}
+                              className={`exercise-preview-row ${exercise.completed ? 'exercise-preview-row-complete' : ''}`}
+                            >
+                              <span className="exercise-preview-name">{exercise.name || 'Unnamed exercise'}</span>
+                              <span className="exercise-preview-weight">
+                                {formatExerciseWeight(exercise.weight, exercise.weight_unit)}
+                              </span>
+                            </li>
+                          ))}
+                          {day.exercises.length === 0 ? <li>Add your first exercise to get started.</li> : null}
+                        </ul>
+                        {day.exercises.length > 3 ? (
+                          <p className="helper-text workout-accordion-detail">
+                            +{day.exercises.length - 3} more exercises inside this workout
+                          </p>
+                        ) : null}
+                        <div className="day-card-actions">
+                          <button type="button" className="primary-button inline-button" onClick={() => handleViewDay(day.day_number)}>
+                            View Workout
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </article>
                 );

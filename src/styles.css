@@ -524,10 +524,6 @@ img {
   letter-spacing: -0.03em;
 }
 
-.clickable-card {
-  cursor: pointer;
-}
-
 .summary-toggle {
   display: none;
   flex-shrink: 0;
@@ -623,17 +619,114 @@ img {
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.34), 0 0 0 1px rgba(46, 242, 179, 0.08);
 }
 
-.day-card-header {
-  gap: 12px;
+.workout-accordion-card {
+  padding: 16px;
 }
 
-.day-card-header h3 {
-  font-size: 1.35rem;
+.day-card-topbar {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.workout-accordion-toggle {
+  border: none;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.workout-accordion-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.workout-accordion-heading {
+  min-width: 0;
+}
+
+.workout-accordion-heading h3 {
+  font-size: 1.22rem;
   letter-spacing: -0.03em;
 }
 
+.workout-accordion-summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.workout-accordion-summary strong {
+  font-size: 0.97rem;
+  letter-spacing: -0.02em;
+}
+
+.workout-accordion-progress {
+  margin: 0;
+}
+
+.workout-accordion-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.accordion-chevron {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-soft);
+  transition: transform 220ms ease, color 160ms ease;
+}
+
+.accordion-chevron svg {
+  width: 18px;
+  height: 18px;
+}
+
+.accordion-chevron-open {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+
 .workout-card-edit-button {
-  margin-left: auto;
+  align-self: start;
+}
+
+.workout-accordion-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 240ms ease, opacity 180ms ease, margin-top 180ms ease;
+}
+
+.workout-accordion-panel-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.workout-accordion-panel-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  margin-top: 14px;
+}
+
+.workout-accordion-detail {
+  margin: -2px 0 0;
 }
 
 .mini-progress-track,
@@ -682,6 +775,7 @@ img {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin-top: 14px;
 }
 
 .plan-controls {
