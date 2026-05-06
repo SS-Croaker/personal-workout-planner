@@ -255,10 +255,13 @@ img {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(130, 198, 175, 0.12);
-  background: rgba(255, 255, 255, 0.035);
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(46, 242, 179, 0.16);
+  background:
+    radial-gradient(circle at top right, rgba(46, 242, 179, 0.08), transparent 38%),
+    rgba(255, 255, 255, 0.04);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(46, 242, 179, 0.04);
 }
 
 .sidebar-plan-header {
@@ -268,8 +271,9 @@ img {
 }
 
 .sidebar-plan-header strong {
-  font-size: 1rem;
+  font-size: 1.08rem;
   letter-spacing: -0.02em;
+  color: var(--text);
 }
 
 .sidebar-link-button {
@@ -282,6 +286,15 @@ img {
   border: 1px solid rgba(130, 198, 175, 0.12);
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
+}
+
+.sidebar-plan-switcher .plan-selector {
+  gap: 8px;
+}
+
+.sidebar-plan-switcher .plan-selector select {
+  border-color: rgba(46, 242, 179, 0.14);
+  background: rgba(8, 18, 16, 0.9);
 }
 
 .status-chip {

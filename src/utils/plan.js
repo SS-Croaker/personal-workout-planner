@@ -21,13 +21,16 @@ export const WEIGHT_UNITS = [
 ];
 
 export const WORKOUT_NAME_SUGGESTIONS = [
+  'Chest Day',
+  'Leg Day',
+  'Back Day',
+  'Biceps',
   'Push Day',
   'Pull Day',
-  'Leg Day',
-  'Chest Day',
-  'Upper Body',
-  'Lower Body',
+  'Shoulders',
+  'Cardio',
   'Conditioning',
+  'Mobility',
   'Recovery',
 ];
 

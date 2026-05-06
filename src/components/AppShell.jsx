@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useFeedbackStore } from '../store/feedbackStore';
 import { useWorkoutStore } from '../store/workoutStore';
@@ -7,6 +7,7 @@ import ToastStack from './ToastStack';
 
 export default function AppShell() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const signOutUser = useAuthStore((state) => state.signOutUser);
   const user = useAuthStore((state) => state.user);
@@ -69,6 +70,7 @@ export default function AppShell() {
         message: 'You’re now viewing a different workout plan.',
       });
       closeMobileMenu();
+      navigate('/', { replace: true });
     } catch (error) {
       showToast({
         type: 'error',
@@ -113,18 +115,14 @@ export default function AppShell() {
             Everything you need is right here when you're ready to train.
           </p>
 
-          <nav className="nav-links">
-            <NavLink to="/" onClick={closeMobileMenu}>Dashboard</NavLink>
-            <NavLink to="/create-plan" onClick={closeMobileMenu}>Plans</NavLink>
-            <NavLink to="/profile-setup" onClick={closeMobileMenu}>{profile ? 'Profile' : 'Set Up Profile'}</NavLink>
-            <NavLink to="/training-guide" onClick={closeMobileMenu}>Training Guide</NavLink>
-          </nav>
-
           {plans.length > 0 ? (
             <section className="sidebar-plan-switcher">
               <div className="sidebar-plan-header">
                 <p className="eyebrow">Active Plan</p>
                 <strong>{plan?.name || 'Workout Plan'}</strong>
+                <span className="helper-text">
+                  {plan?.days?.length || 0} workouts ready this week
+                </span>
               </div>
               <label className="plan-selector">
                 <span className="helper-text">Switch plan</span>
@@ -141,6 +139,13 @@ export default function AppShell() {
               </NavLink>
             </section>
           ) : null}
+
+          <nav className="nav-links">
+            <NavLink to="/" onClick={closeMobileMenu}>Dashboard</NavLink>
+            <NavLink to="/create-plan" onClick={closeMobileMenu}>Create Plan</NavLink>
+            <NavLink to="/profile-setup" onClick={closeMobileMenu}>{profile ? 'Profile' : 'Set Up Profile'}</NavLink>
+            <NavLink to="/training-guide" onClick={closeMobileMenu}>Training Guide</NavLink>
+          </nav>
         </div>
 
         <div className="sidebar-footer">
