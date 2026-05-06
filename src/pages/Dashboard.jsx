@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import StatCard from '../components/StatCard';
 import { useAuthStore } from '../store/authStore';
@@ -7,6 +8,7 @@ import { formatExerciseWeight } from '../utils/plan';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [statsOpen, setStatsOpen] = useState(false);
   const user = useAuthStore((state) => state.user);
   const showToast = useFeedbackStore((state) => state.showToast);
   const profile = useWorkoutStore((state) => state.profile);
@@ -70,26 +72,39 @@ export default function Dashboard() {
   };
 
   return (
-    <section className="page-section">
-      <div className="section-header">
-        <div>
-          <p className="eyebrow">Dashboard</p>
-          <h2>Welcome back, {profile.name}. Let’s get to work.</h2>
+    <section className="page-section dashboard-page">
+      <div className={`panel dashboard-summary ${statsOpen ? 'dashboard-summary-open' : ''}`}>
+        <div className="dashboard-summary-header">
+          <div>
+            <p className="eyebrow">Dashboard</p>
+            <h2>Welcome back, {profile.name}. Let’s get to work.</h2>
+          </div>
+          <button
+            type="button"
+            className="secondary-button inline-button summary-toggle"
+            onClick={() => setStatsOpen((current) => !current)}
+            aria-expanded={statsOpen}
+            aria-controls="dashboard-stats"
+          >
+            {statsOpen ? 'Hide Stats' : 'View Stats'}
+          </button>
         </div>
-        <p className="muted">
+        <p className="muted dashboard-summary-copy">
           Your weekly plan is lined up and ready when you are.
         </p>
-      </div>
 
-      <div className="stats-grid">
-        <StatCard label="BMI" value={profile.bmi || '--'} hint="Saved from your profile details." />
-        <StatCard label="Height" value={`${profile.height_cm || '--'} cm`} />
-        <StatCard label="Weight" value={`${profile.weight_kg || '--'} kg`} />
-        <StatCard label="Workout Days" value={plan?.days_per_week || 0} hint="" />
+        <div id="dashboard-stats" className={`dashboard-stats-wrap ${statsOpen ? 'open' : ''}`}>
+          <div className="stats-grid">
+            <StatCard label="BMI" value={profile.bmi || '--'} hint="Saved from your profile details." />
+            <StatCard label="Height" value={`${profile.height_cm || '--'} cm`} />
+            <StatCard label="Weight" value={`${profile.weight_kg || '--'} kg`} />
+            <StatCard label="Workout Days" value={plan?.days_per_week || 0} hint="" />
+          </div>
+        </div>
       </div>
 
       {!plan ? (
-        <div className="panel empty-state">
+        <div className="panel empty-state dashboard-plan-panel">
           <h3>Your first workout plan starts here</h3>
           <p className="muted">
             Build out your week, add your exercises, and give yourself a clear plan to follow.
@@ -99,7 +114,7 @@ export default function Dashboard() {
           </Link>
         </div>
       ) : (
-        <div className="panel">
+        <div className="panel dashboard-plan-panel">
           <div className="panel-header-row">
             <div>
               <h3>Your Weekly Workout Plan</h3>
