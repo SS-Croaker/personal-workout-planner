@@ -1113,6 +1113,29 @@ img {
 
 .exercise-card {
   overflow: hidden;
+  padding: 16px;
+}
+
+.exercise-card-header {
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.exercise-card-title .eyebrow {
+  margin-bottom: 0;
+}
+
+.exercise-remove-button {
+  margin-left: auto;
+  color: #ffb0b0;
+}
+
+.exercise-remove-button:hover,
+.exercise-remove-button:focus-visible {
+  color: #ffd5d5;
+  background: rgba(255, 119, 119, 0.08);
+  border-color: rgba(255, 119, 119, 0.18);
 }
 
 .grid-form {
@@ -1121,23 +1144,77 @@ img {
   gap: 16px;
 }
 
+.exercise-editor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+}
+
+.exercise-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.exercise-field > span {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.exercise-field-name,
+.exercise-field-image {
+  grid-column: 1 / -1;
+}
+
+.exercise-field input,
+.exercise-field select {
+  min-height: 44px;
+  padding: 12px 14px;
+}
+
+.exercise-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.exercise-card-meta span {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(130, 198, 175, 0.1);
+  color: var(--text-soft);
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+.compact-helper-text {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+}
+
 .editor-toolbar {
   flex-wrap: wrap;
 }
 
 .image-preview-row {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 14px;
-  margin-top: 16px;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
 }
 
 .image-preview {
-  width: 96px;
-  height: 96px;
+  width: 72px;
+  height: 72px;
   object-fit: cover;
-  border-radius: 18px;
+  border-radius: 16px;
   border: 1px solid rgba(130, 198, 175, 0.18);
   box-shadow: var(--shadow-soft);
 }
@@ -1375,11 +1452,6 @@ img {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .image-preview-row {
-    flex-direction: row;
-    align-items: center;
-  }
-
   .day-view-row {
     grid-template-columns: auto minmax(0, 1.5fr) auto auto;
     align-items: center;
@@ -1408,6 +1480,25 @@ img {
   .training-guide-actions {
     flex-direction: row;
     justify-content: space-between;
+  }
+}
+
+@media (max-width: 479px) {
+  .exercise-editor-grid {
+    gap: 8px 10px;
+  }
+
+  .exercise-card {
+    padding: 14px;
+  }
+
+  .exercise-card-meta {
+    gap: 6px;
+  }
+
+  .exercise-card-meta span {
+    font-size: 0.76rem;
+    padding: 5px 8px;
   }
 }
 

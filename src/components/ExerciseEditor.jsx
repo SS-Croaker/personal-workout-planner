@@ -24,14 +24,31 @@ export default function ExerciseEditor({
   return (
     <div className="exercise-card">
       <div className="exercise-card-header">
-        <h3>Exercise {index + 1}</h3>
-        <button type="button" className="text-button danger-text" onClick={() => onRemove(index)}>
-          Remove
+        <div className="exercise-card-title">
+          <p className="eyebrow">Exercise {index + 1}</p>
+        </div>
+        <button
+          type="button"
+          className="icon-button exercise-remove-button"
+          onClick={() => onRemove(index)}
+          aria-label={`Remove exercise ${index + 1}`}
+          title="Remove exercise"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M6 6 18 18M18 6 6 18"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </button>
       </div>
 
-      <div className="grid-form">
-        <label>
+      <div className="exercise-editor-grid">
+        <label className="exercise-field exercise-field-name">
           <span>Name</span>
           <input
             value={exercise.name}
@@ -45,10 +62,10 @@ export default function ExerciseEditor({
               <option key={suggestion} value={suggestion} />
             ))}
           </datalist>
-          <p className="helper-text">Type freely or pick a suggested exercise.</p>
+          {lastUsedWeightHint ? <p className="helper-text compact-helper-text">Last used: {lastUsedWeightHint}</p> : null}
         </label>
 
-        <label>
+        <label className="exercise-field">
           <span>Type</span>
           <select
             value={normalizeExerciseType(exercise.type)}
@@ -60,10 +77,9 @@ export default function ExerciseEditor({
               </option>
             ))}
           </select>
-          <p className="helper-text">Current type: {getExerciseTypeLabel(exercise.type)}</p>
         </label>
 
-        <label>
+        <label className="exercise-field">
           <span>Equipment</span>
           <select
             value={normalizeExerciseEquipment(exercise.equipment)}
@@ -76,10 +92,9 @@ export default function ExerciseEditor({
               </option>
             ))}
           </select>
-          <p className="helper-text">Current equipment: {getExerciseEquipmentLabel(exercise.equipment)}</p>
         </label>
 
-        <label>
+        <label className="exercise-field">
           <span>Weight</span>
           <input
             type="number"
@@ -89,11 +104,9 @@ export default function ExerciseEditor({
             onChange={(event) => onChange(index, 'weight', event.target.value)}
             placeholder="40"
           />
-          <p className="helper-text">Current weight: {formatExerciseWeight(exercise.weight, exercise.weight_unit)}</p>
-          {lastUsedWeightHint ? <p className="helper-text">Last used: {lastUsedWeightHint}</p> : null}
         </label>
 
-        <label>
+        <label className="exercise-field">
           <span>Unit</span>
           <select
             value={normalizeWeightUnit(exercise.weight_unit)}
@@ -107,21 +120,27 @@ export default function ExerciseEditor({
           </select>
         </label>
 
-        <label>
+        <label className="exercise-field exercise-field-image">
           <span>Exercise image</span>
           <input type="file" accept="image/*" onChange={(event) => onImageChange(index, event.target.files?.[0])} />
         </label>
       </div>
 
+      <div className="exercise-card-meta">
+        <span>{getExerciseTypeLabel(exercise.type)}</span>
+        <span>{getExerciseEquipmentLabel(exercise.equipment)}</span>
+        <span>{formatExerciseWeight(exercise.weight, exercise.weight_unit)}</span>
+      </div>
+
       {exercise.image_url ? (
         <div className="image-preview-row">
           <img src={exercise.image_url} alt={exercise.name || `Exercise ${index + 1}`} className="image-preview" />
-          <p className="helper-text">Stored image is already compressed before upload.</p>
+          <p className="helper-text compact-helper-text">Image ready</p>
         </div>
       ) : null}
 
       {exercise.pendingImageName ? (
-        <p className="helper-text">Queued for compression and upload: {exercise.pendingImageName}</p>
+        <p className="helper-text compact-helper-text">Uploading next: {exercise.pendingImageName}</p>
       ) : null}
     </div>
   );

@@ -6,9 +6,6 @@ import { useFeedbackStore } from '../store/feedbackStore';
 import { useWorkoutStore } from '../store/workoutStore';
 import {
   createEmptyExercise,
-  formatExerciseWeight,
-  getExerciseEquipmentLabel,
-  getExerciseTypeLabel,
   normalizeWorkoutTitle,
   WORKOUT_NAME_SUGGESTIONS,
 } from '../utils/plan';
@@ -304,9 +301,6 @@ export default function DayEditor() {
               onImageChange={updateExerciseImage}
               onRemove={removeExercise}
             />
-            <p className="helper-text">
-              Focus: {getExerciseTypeLabel(exercise.type)} | Equipment: {getExerciseEquipmentLabel(exercise.equipment)} | Weight: {formatExerciseWeight(exercise.weight, exercise.weight_unit)}
-            </p>
           </div>
         ))}
 
