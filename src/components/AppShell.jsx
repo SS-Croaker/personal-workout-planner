@@ -117,6 +117,7 @@ export default function AppShell() {
             <NavLink to="/" onClick={closeMobileMenu}>Dashboard</NavLink>
             <NavLink to="/create-plan" onClick={closeMobileMenu}>Plans</NavLink>
             <NavLink to="/profile-setup" onClick={closeMobileMenu}>{profile ? 'Profile' : 'Set Up Profile'}</NavLink>
+            <NavLink to="/training-guide" onClick={closeMobileMenu}>Training Guide</NavLink>
           </nav>
 
           {plans.length > 0 ? (

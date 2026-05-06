@@ -20,6 +20,7 @@ export const useWorkoutStore = create(
       plans: [],
       activePlanId: null,
       plan: null,
+      onboardingCompleted: true,
       sessionUid: null,
       bootstrapped: false,
       hydratedThisSession: false,
@@ -37,11 +38,20 @@ export const useWorkoutStore = create(
         try {
           const data = await dbService.bootstrapUserData(uid);
           const normalizedWorkoutPlans = normalizeWorkoutPlansDoc(data.plan, uid);
+          const hasExistingData = Boolean(
+            data.profile ||
+            (normalizedWorkoutPlans.plans && normalizedWorkoutPlans.plans.length > 0),
+          );
+          const onboardingCompleted =
+            typeof data.profile?.onboarding_completed === 'boolean'
+              ? data.profile.onboarding_completed
+              : hasExistingData;
           set({
             profile: data.profile,
             plans: normalizedWorkoutPlans.plans,
             activePlanId: normalizedWorkoutPlans.activePlanId,
             plan: normalizedWorkoutPlans.activePlan,
+            onboardingCompleted,
             sessionUid: uid,
             bootstrapped: true,
             hydratedThisSession: true,
@@ -56,20 +66,41 @@ export const useWorkoutStore = create(
       saveProfile: async (uid, profile) => {
         await dbService.saveProfile(uid, profile);
         set({
-          profile,
+          profile: {
+            ...get().profile,
+            ...profile,
+          },
+          onboardingCompleted: get().onboardingCompleted,
           sessionUid: uid,
           bootstrapped: true,
           hydratedThisSession: true,
         });
       },
 
-      createPlan: async (uid, planName, daysPerWeek) => {
+      completeOnboarding: async (uid) => {
+        await dbService.saveOnboardingState(uid, true);
+        set({
+          profile: get().profile
+            ? {
+                ...get().profile,
+                onboarding_completed: true,
+              }
+            : get().profile,
+          onboardingCompleted: true,
+          sessionUid: uid,
+          bootstrapped: true,
+          hydratedThisSession: true,
+        });
+      },
+
+      createPlan: async (uid, planName, daysPerWeek, customDays = []) => {
         const currentProfile = get().profile;
         const currentPlans = get().plans;
         const nextPlan = createPlanRecord({
           userId: uid,
           name: planName,
           daysPerWeek,
+          days: customDays,
         });
         const nextPlans = [...currentPlans, nextPlan];
         const payload = buildWorkoutPlansPayload(nextPlans, nextPlan.id);
@@ -345,6 +376,7 @@ export const useWorkoutStore = create(
           plans: [],
           activePlanId: null,
           plan: null,
+          onboardingCompleted: true,
           sessionUid: null,
           bootstrapped: false,
           hydratedThisSession: false,
@@ -359,6 +391,7 @@ export const useWorkoutStore = create(
         plans: state.plans,
         activePlanId: state.activePlanId,
         plan: state.plan,
+        onboardingCompleted: state.onboardingCompleted,
         sessionUid: state.sessionUid,
         bootstrapped: state.bootstrapped,
       }),

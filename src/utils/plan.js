@@ -123,10 +123,10 @@ export function normalizeExercise(exercise) {
   };
 }
 
-export function createEmptyPlanDays(daysPerWeek) {
+export function createEmptyPlanDays(daysPerWeek, existingDays = []) {
   return Array.from({ length: daysPerWeek }, (_, index) => ({
     day_number: index + 1,
-    title: WORKOUT_NAME_SUGGESTIONS[index] || `Workout ${index + 1}`,
+    title: existingDays[index]?.title?.trim() || WORKOUT_NAME_SUGGESTIONS[index] || `Workout ${index + 1}`,
     exercises: [],
   }));
 }
@@ -139,7 +139,14 @@ function createPlanId() {
   return `plan-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export function createPlanRecord({ userId, name, daysPerWeek, id = createPlanId(), createdAt = new Date().toISOString() }) {
+export function createPlanRecord({
+  userId,
+  name,
+  daysPerWeek,
+  days,
+  id = createPlanId(),
+  createdAt = new Date().toISOString(),
+}) {
   return {
     id,
     user_id: userId,
@@ -147,7 +154,11 @@ export function createPlanRecord({ userId, name, daysPerWeek, id = createPlanId(
     created_at: createdAt,
     is_active: true,
     days_per_week: daysPerWeek,
-    days: createEmptyPlanDays(daysPerWeek),
+    days: Array.isArray(days) && days.length > 0 ? days.map((day, index) => ({
+      day_number: index + 1,
+      title: normalizeWorkoutTitle(day.title, index + 1),
+      exercises: Array.isArray(day.exercises) ? day.exercises : [],
+    })) : createEmptyPlanDays(daysPerWeek),
   };
 }
 

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useWorkoutStore } from '../store/workoutStore';
@@ -12,10 +12,28 @@ export default function CreateWorkoutPlanPage() {
   const plans = useWorkoutStore((state) => state.plans);
   const [planName, setPlanName] = useState(`Plan ${Math.max(plans.length + 1, 1)}`);
   const [daysPerWeek, setDaysPerWeek] = useState(plan?.days_per_week || 4);
+  const [previewDays, setPreviewDays] = useState(() => createEmptyPlanDays(plan?.days_per_week || 4));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  const previewDays = useMemo(() => createEmptyPlanDays(Number(daysPerWeek) || 1), [daysPerWeek]);
+  const handleDaysPerWeekChange = (value) => {
+    const nextCount = Number(value) || 1;
+    setDaysPerWeek(nextCount);
+    setPreviewDays((current) => createEmptyPlanDays(nextCount, current));
+  };
+
+  const handleWorkoutTitleChange = (index, value) => {
+    setPreviewDays((current) =>
+      current.map((day, dayIndex) =>
+        dayIndex === index
+          ? {
+              ...day,
+              title: value,
+            }
+          : day,
+      ),
+    );
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -29,7 +47,7 @@ export default function CreateWorkoutPlanPage() {
     setSaving(true);
 
     try {
-      await createPlan(user.uid, planName, Number(daysPerWeek));
+      await createPlan(user.uid, planName, Number(daysPerWeek), previewDays);
       navigate('/', { replace: true });
     } catch (submitError) {
       setError(submitError.message || 'We couldn’t save your workout plan right now.');
@@ -58,7 +76,7 @@ export default function CreateWorkoutPlanPage() {
 
         <label>
           <span>Days per week</span>
-          <select value={daysPerWeek} onChange={(event) => setDaysPerWeek(event.target.value)}>
+          <select value={daysPerWeek} onChange={(event) => handleDaysPerWeekChange(event.target.value)}>
             {[1, 2, 3, 4, 5, 6, 7].map((day) => (
               <option key={day} value={day}>
                 {day}
@@ -68,9 +86,16 @@ export default function CreateWorkoutPlanPage() {
         </label>
 
         <div className="preview-grid">
-          {previewDays.map((day) => (
+          {previewDays.map((day, index) => (
             <div key={day.day_number} className="mini-day-card">
-              <h3>{day.title}</h3>
+              <label className="preview-day-label">
+                <span>Workout {day.day_number}</span>
+                <input
+                  value={day.title}
+                  onChange={(event) => handleWorkoutTitleChange(index, event.target.value)}
+                  placeholder={`Workout ${day.day_number}`}
+                />
+              </label>
               <p className="helper-text">You can add exercises to this workout whenever you’re ready.</p>
             </div>
           ))}

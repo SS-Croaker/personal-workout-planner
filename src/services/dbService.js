@@ -36,6 +36,18 @@ export const dbService = {
     );
   },
 
+  async saveOnboardingState(uid, completed) {
+    await setDoc(
+      userDoc(uid),
+      {
+        onboarding_completed: Boolean(completed),
+        onboarding_completed_at: serverTimestamp(),
+        updated_at: serverTimestamp(),
+      },
+      { merge: true },
+    );
+  },
+
   async saveProfileAndWorkoutPlans(uid, profile, workoutPlans) {
     const batch = writeBatch(db);
 
