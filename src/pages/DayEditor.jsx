@@ -6,6 +6,7 @@ import { useFeedbackStore } from '../store/feedbackStore';
 import { useWorkoutStore } from '../store/workoutStore';
 import {
   createEmptyExercise,
+  formatExerciseWeight,
   normalizeWorkoutTitle,
   WORKOUT_NAME_SUGGESTIONS,
 } from '../utils/plan';
@@ -47,6 +48,32 @@ const COMMON_EXERCISES = [
   'Rowing Machine',
 ];
 
+function normalizeSuggestionValue(value) {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function dedupeSuggestions(values) {
+  const seen = new Set();
+  const unique = [];
+
+  values.forEach((value) => {
+    const normalizedValue = normalizeSuggestionValue(value);
+    if (!normalizedValue) {
+      return;
+    }
+
+    const lookupKey = normalizedValue.toLowerCase();
+    if (seen.has(lookupKey)) {
+      return;
+    }
+
+    seen.add(lookupKey);
+    unique.push(normalizedValue);
+  });
+
+  return unique;
+}
+
 export default function DayEditor() {
   const { dayNumber } = useParams();
   const navigate = useNavigate();
@@ -64,22 +91,32 @@ export default function DayEditor() {
   const [error, setError] = useState('');
   const [pendingScrollIndex, setPendingScrollIndex] = useState(null);
   const exerciseRefs = useRef([]);
+  const suggestionPool = useMemo(() => {
+    const planExerciseNames =
+      plan?.days?.flatMap((day) =>
+        (day.exercises || []).map((exercise) => normalizeSuggestionValue(exercise?.name)),
+      ) || [];
+
+    return dedupeSuggestions([...COMMON_EXERCISES, ...planExerciseNames]);
+  }, [plan?.days]);
   const exerciseSuggestions = useMemo(
     () =>
       draft?.exercises.map((exercise) => {
-        const query = exercise.name.trim().toLowerCase();
+        const query = normalizeSuggestionValue(exercise?.name).toLowerCase();
         if (!query) {
-          return COMMON_EXERCISES.slice(0, 10);
+          return suggestionPool.slice(0, 10);
         }
 
-        return COMMON_EXERCISES.filter((suggestion) => suggestion.toLowerCase().includes(query)).slice(0, 8);
+        return suggestionPool
+          .filter((suggestion) => suggestion.toLowerCase().includes(query))
+          .slice(0, 8);
       }) || [],
-    [draft],
+    [draft, suggestionPool],
   );
   const lastUsedWeightHints = useMemo(
     () =>
       draft?.exercises.map((exercise, index) => {
-        const normalizedName = exercise.name?.trim().toLowerCase();
+        const normalizedName = normalizeSuggestionValue(exercise?.name).toLowerCase();
 
         if (!normalizedName || !plan?.days) {
           return '';
@@ -91,7 +128,7 @@ export default function DayEditor() {
               return false;
             }
 
-            return candidate.name?.trim().toLowerCase() === normalizedName && Number(candidate.weight) > 0;
+            return normalizeSuggestionValue(candidate?.name).toLowerCase() === normalizedName && Number(candidate.weight) > 0;
           }),
         );
 

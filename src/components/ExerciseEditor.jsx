@@ -20,6 +20,7 @@ export default function ExerciseEditor({
   onRemove,
 }) {
   const datalistId = `exercise-suggestions-${index}`;
+  const safeSuggestions = Array.isArray(suggestions) ? suggestions.filter((suggestion) => typeof suggestion === 'string' && suggestion.trim()) : [];
 
   return (
     <div className="exercise-card">
@@ -58,8 +59,8 @@ export default function ExerciseEditor({
             autoComplete="off"
           />
           <datalist id={datalistId}>
-            {suggestions.map((suggestion) => (
-              <option key={suggestion} value={suggestion} />
+            {safeSuggestions.map((suggestion, suggestionIndex) => (
+              <option key={`${datalistId}-${suggestionIndex}-${suggestion}`} value={suggestion} />
             ))}
           </datalist>
           {lastUsedWeightHint ? <p className="helper-text compact-helper-text">Last used: {lastUsedWeightHint}</p> : null}
