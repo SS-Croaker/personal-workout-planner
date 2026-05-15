@@ -1,5 +1,6 @@
 import { doc, getDoc, serverTimestamp, setDoc, writeBatch } from 'firebase/firestore';
 import { db } from './firebase';
+import { getFriendlyErrorMessage } from '../utils/errors';
 
 const usersCollection = 'users';
 const workoutPlansCollection = 'workoutPlans';
@@ -12,38 +13,54 @@ function workoutPlanDoc(uid) {
   return doc(db, workoutPlansCollection, uid);
 }
 
+async function withDbError(operation, fallback) {
+  try {
+    return await operation();
+  } catch (error) {
+    throw new Error(getFriendlyErrorMessage(error, fallback));
+  }
+}
+
 export const dbService = {
   async bootstrapUserData(uid) {
-    const [profileSnapshot, planSnapshot] = await Promise.all([
-      getDoc(userDoc(uid)),
-      getDoc(workoutPlanDoc(uid)),
-    ]);
+    return withDbError(async () => {
+      const [profileSnapshot, planSnapshot] = await Promise.all([
+        getDoc(userDoc(uid)),
+        getDoc(workoutPlanDoc(uid)),
+      ]);
 
-    return {
-      profile: profileSnapshot.exists() ? profileSnapshot.data() : null,
-      plan: planSnapshot.exists() ? planSnapshot.data() : null,
-    };
+      return {
+        profile: profileSnapshot.exists() ? profileSnapshot.data() : null,
+        plan: planSnapshot.exists() ? planSnapshot.data() : null,
+      };
+    }, 'We could not load your training data right now.');
   },
 
   async saveProfile(uid, profile) {
-    await setDoc(
-      userDoc(uid),
-      {
-        ...profile,
-        updated_at: serverTimestamp(),
-      },
-      { merge: true },
+    await withDbError(
+      () => setDoc(
+        userDoc(uid),
+        {
+          ...profile,
+          updated_at: serverTimestamp(),
+        },
+        { merge: true },
+      ),
+      'We could not save your profile right now.',
     );
   },
 
   async saveProfileFields(uid, fields) {
-    await setDoc(
-      userDoc(uid),
-      {
-        ...fields,
-        updated_at: serverTimestamp(),
-      },
-      { merge: true },
+    await withDbError(
+      () => setDoc(
+        userDoc(uid),
+        {
+          ...fields,
+          updated_at: serverTimestamp(),
+        },
+        { merge: true },
+      ),
+      'We could not update your workout history right now.',
     );
   },
 
@@ -55,33 +72,38 @@ export const dbService = {
   },
 
   async saveProfileAndWorkoutPlans(uid, profile, workoutPlans) {
-    const batch = writeBatch(db);
+    await withDbError(async () => {
+      const batch = writeBatch(db);
 
-    batch.set(
-      userDoc(uid),
-      {
-        ...profile,
+      batch.set(
+        userDoc(uid),
+        {
+          ...profile,
+          updated_at: serverTimestamp(),
+        },
+        { merge: true },
+      );
+
+      batch.set(workoutPlanDoc(uid), {
+        ...workoutPlans,
         updated_at: serverTimestamp(),
-      },
-      { merge: true },
-    );
+      });
 
-    batch.set(workoutPlanDoc(uid), {
-      ...workoutPlans,
-      updated_at: serverTimestamp(),
-    });
-
-    await batch.commit();
+      await batch.commit();
+    }, 'We could not save your workout plan right now.');
   },
 
   async saveWorkoutPlans(uid, workoutPlans) {
-    await setDoc(
-      workoutPlanDoc(uid),
-      {
-        ...workoutPlans,
-        updated_at: serverTimestamp(),
-      },
-      { merge: true },
+    await withDbError(
+      () => setDoc(
+        workoutPlanDoc(uid),
+        {
+          ...workoutPlans,
+          updated_at: serverTimestamp(),
+        },
+        { merge: true },
+      ),
+      'We could not save your workout plan right now.',
     );
   },
 };

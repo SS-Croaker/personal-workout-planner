@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { dbService } from '../services/dbService';
 import { storageService } from '../services/storageService';
 import { ensureDateKey, normalizeActivityDates, toggleDateKey, toDateKey } from '../utils/consistency';
+import { getFriendlyErrorMessage } from '../utils/errors';
 import {
   buildWorkoutPlansPayload,
   createPlanRecord,
@@ -26,6 +27,7 @@ export const useWorkoutStore = create(
       bootstrapped: false,
       hydratedThisSession: false,
       loading: false,
+      bootstrapError: '',
 
       hydrateFromCloud: async (uid, forceRefresh = false) => {
         const state = get();
@@ -34,7 +36,7 @@ export const useWorkoutStore = create(
           return;
         }
 
-        set({ loading: true });
+        set({ loading: true, bootstrapError: '' });
 
         try {
           const data = await dbService.bootstrapUserData(uid);
@@ -62,12 +64,20 @@ export const useWorkoutStore = create(
             bootstrapped: true,
             hydratedThisSession: true,
             loading: false,
+            bootstrapError: '',
           });
         } catch (error) {
-          set({ loading: false });
+          set({
+            loading: false,
+            bootstrapped: false,
+            hydratedThisSession: false,
+            bootstrapError: getFriendlyErrorMessage(error, 'We could not load your training data right now.'),
+          });
           throw error;
         }
       },
+
+      clearBootstrapError: () => set({ bootstrapError: '' }),
 
       saveProfile: async (uid, profile) => {
         await dbService.saveProfile(uid, profile);
@@ -81,6 +91,7 @@ export const useWorkoutStore = create(
           sessionUid: uid,
           bootstrapped: true,
           hydratedThisSession: true,
+          bootstrapError: '',
         });
       },
 
@@ -97,6 +108,7 @@ export const useWorkoutStore = create(
           sessionUid: uid,
           bootstrapped: true,
           hydratedThisSession: true,
+          bootstrapError: '',
         });
       },
 
@@ -125,6 +137,7 @@ export const useWorkoutStore = create(
           sessionUid: uid,
           bootstrapped: true,
           hydratedThisSession: true,
+          bootstrapError: '',
         });
       },
 
@@ -141,6 +154,7 @@ export const useWorkoutStore = create(
           sessionUid: uid,
           bootstrapped: true,
           hydratedThisSession: true,
+          bootstrapError: '',
         });
 
         try {
@@ -153,6 +167,7 @@ export const useWorkoutStore = create(
             sessionUid: uid,
             bootstrapped: true,
             hydratedThisSession: true,
+            bootstrapError: '',
           });
           throw error;
         }
@@ -235,6 +250,7 @@ export const useWorkoutStore = create(
           sessionUid: uid,
           bootstrapped: true,
           hydratedThisSession: true,
+          bootstrapError: '',
         });
       },
 
@@ -278,6 +294,7 @@ export const useWorkoutStore = create(
           sessionUid: uid,
           bootstrapped: true,
           hydratedThisSession: true,
+          bootstrapError: '',
         });
 
         try {
@@ -290,6 +307,7 @@ export const useWorkoutStore = create(
             sessionUid: uid,
             bootstrapped: true,
             hydratedThisSession: true,
+            bootstrapError: '',
           });
           throw error;
         }
@@ -331,6 +349,7 @@ export const useWorkoutStore = create(
           sessionUid: uid,
           bootstrapped: true,
           hydratedThisSession: true,
+          bootstrapError: '',
         });
 
         try {
@@ -343,6 +362,7 @@ export const useWorkoutStore = create(
             sessionUid: uid,
             bootstrapped: true,
             hydratedThisSession: true,
+            bootstrapError: '',
           });
           throw error;
         }
@@ -367,6 +387,7 @@ export const useWorkoutStore = create(
           sessionUid: uid,
           bootstrapped: true,
           hydratedThisSession: true,
+          bootstrapError: '',
         });
 
         try {
@@ -380,6 +401,7 @@ export const useWorkoutStore = create(
             sessionUid: uid,
             bootstrapped: true,
             hydratedThisSession: true,
+            bootstrapError: '',
           });
           throw error;
         }
@@ -410,6 +432,7 @@ export const useWorkoutStore = create(
           sessionUid: uid,
           bootstrapped: true,
           hydratedThisSession: true,
+          bootstrapError: '',
         });
 
         try {
@@ -423,6 +446,7 @@ export const useWorkoutStore = create(
             sessionUid: uid,
             bootstrapped: true,
             hydratedThisSession: true,
+            bootstrapError: '',
           });
           throw error;
         }
@@ -439,6 +463,7 @@ export const useWorkoutStore = create(
           bootstrapped: false,
           hydratedThisSession: false,
           loading: false,
+          bootstrapError: '',
         }),
     }),
     {
