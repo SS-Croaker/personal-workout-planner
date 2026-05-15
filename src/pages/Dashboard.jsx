@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import StatCard from '../components/StatCard';
 import { useAuthStore } from '../store/authStore';
 import { useFeedbackStore } from '../store/feedbackStore';
 import { useWorkoutStore } from '../store/workoutStore';
@@ -9,12 +8,12 @@ import { formatExerciseWeight, normalizeWorkoutTitle } from '../utils/plan';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [statsOpen, setStatsOpen] = useState(false);
   const [expandedWorkout, setExpandedWorkout] = useState(null);
   const [planPendingDelete, setPlanPendingDelete] = useState(null);
   const [deletingPlan, setDeletingPlan] = useState(false);
   const [visibleMonth, setVisibleMonth] = useState(() => new Date());
   const [pendingCheckInDate, setPendingCheckInDate] = useState('');
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const user = useAuthStore((state) => state.user);
   const showToast = useFeedbackStore((state) => state.showToast);
   const profile = useWorkoutStore((state) => state.profile);
@@ -159,36 +158,18 @@ export default function Dashboard() {
 
   return (
     <section className="page-section dashboard-page">
-      <div className={`panel dashboard-summary ${statsOpen ? 'dashboard-summary-open' : ''}`}>
+      <div className="panel dashboard-summary dashboard-summary-top">
         <div className="dashboard-summary-header">
-          <div>
+          <div className="dashboard-summary-copy-block">
             <p className="eyebrow">Dashboard</p>
             <h2>Welcome back, {profile.name}. Let’s get to work.</h2>
+            <p className="muted dashboard-summary-copy">
+              Your weekly plan is lined up and ready when you are.
+            </p>
           </div>
-          <button
-            type="button"
-            className="secondary-button inline-button summary-toggle"
-            onClick={() => setStatsOpen((current) => !current)}
-            aria-expanded={statsOpen}
-            aria-controls="dashboard-stats"
-          >
-            {statsOpen ? 'Hide Stats' : 'View Stats'}
-          </button>
-        </div>
-        <p className="muted dashboard-summary-copy">
-          Your weekly plan is lined up and ready when you are.
-        </p>
-
-        <div id="dashboard-stats" className={`dashboard-stats-wrap ${statsOpen ? 'open' : ''}`}>
-          <div className="stats-grid">
-            <StatCard label="BMI" value={profile.bmi || '--'} hint="Saved from your profile details." />
-            <StatCard label="Height" value={`${profile.height_cm || '--'} cm`} />
-            <StatCard label="Weight" value={`${profile.weight_kg || '--'} kg`} />
-            <StatCard
-              label="Workout Days"
-              value={plan?.days_per_week || 0}
-              hint={plan ? `${completedExercisesInPlan}/${totalExercisesInPlan} complete` : ''}
-            />
+          <div className="bmi-pill">
+            <span className="bmi-pill-label">BMI</span>
+            <strong>{profile.bmi || '--'}</strong>
           </div>
         </div>
       </div>
@@ -209,97 +190,116 @@ export default function Dashboard() {
           <div className="panel-header-row">
             <div className="consistency-overview">
               <p className="eyebrow">Consistency</p>
-              <h3>Training today?</h3>
-              <p className="helper-text">
-                Keep your long-term gym rhythm visible, even when you reset this week’s workout progress.
-              </p>
+              <h3>Keep your rhythm moving.</h3>
             </div>
+            {isTrainingToday ? (
+              <div className="check-in-success-pill">
+                <span>Workout logged today</span>
+                <span aria-hidden="true">✓</span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className={`secondary-button inline-button check-in-toggle ${isTrainingToday ? 'check-in-toggle-active' : ''}`}
+                onClick={() => handleToggleWorkoutDate(todayKey)}
+                disabled={pendingCheckInDate === todayKey}
+              >
+                {pendingCheckInDate === todayKey ? 'Updating...' : 'Log Workout Today'}
+              </button>
+            )}
+          </div>
+
+          <div className="consistency-metrics-strip">
+            <div className="consistency-metric-chip">
+              <span className="consistency-metric-value">{consistencyStats.currentStreak} Week{consistencyStats.currentStreak === 1 ? '' : 's'}</span>
+              <span className="consistency-metric-label">Current</span>
+            </div>
+            <div className="consistency-metric-chip">
+              <span className="consistency-metric-value">Best: {consistencyStats.longestStreak} Week{consistencyStats.longestStreak === 1 ? '' : 's'}</span>
+              <span className="consistency-metric-label">Longest</span>
+            </div>
+            <div className="consistency-metric-chip">
+              <span className="consistency-metric-value">{monthWorkoutCount} Workout Day{monthWorkoutCount === 1 ? '' : 's'}</span>
+              <span className="consistency-metric-label">This month</span>
+            </div>
+          </div>
+
+          <div className="consistency-calendar-shell">
             <button
               type="button"
-              className={`secondary-button inline-button check-in-toggle ${isTrainingToday ? 'check-in-toggle-active' : ''}`}
-              onClick={() => handleToggleWorkoutDate(todayKey)}
-              disabled={pendingCheckInDate === todayKey}
+              className="consistency-calendar-summary"
+              onClick={() => setCalendarOpen((current) => !current)}
+              aria-expanded={calendarOpen}
+              aria-controls="dashboard-calendar"
             >
-              {pendingCheckInDate === todayKey
-                ? 'Updating...'
-                : isTrainingToday
-                  ? 'Workout Logged Today'
-                  : 'Log Workout Today'}
-            </button>
-          </div>
-
-          <div className="consistency-stats-grid">
-            <StatCard
-              label="Current Streak"
-              value={`${consistencyStats.currentStreak} Week${consistencyStats.currentStreak === 1 ? '' : 's'}`}
-              hint="A week counts when you train at least once."
-            />
-            <StatCard
-              label="Longest Streak"
-              value={`${consistencyStats.longestStreak} Week${consistencyStats.longestStreak === 1 ? '' : 's'}`}
-              hint="Your best returning-to-training run so far."
-            />
-            <StatCard
-              label="This Month"
-              value={`${monthWorkoutCount} workout day${monthWorkoutCount === 1 ? '' : 's'}`}
-              hint="Tap any day below to add or remove a workout check-in."
-            />
-          </div>
-
-          <div className="consistency-calendar">
-            <div className="consistency-calendar-header">
               <div>
                 <p className="eyebrow">Workout Calendar</p>
-                <strong>{getMonthLabel(visibleMonth)}</strong>
+                <strong>{monthWorkoutCount} workout day{monthWorkoutCount === 1 ? '' : 's'} in {getMonthLabel(visibleMonth)}</strong>
               </div>
-              <div className="calendar-nav">
-                <button
-                  type="button"
-                  className="icon-button"
-                  onClick={() => setVisibleMonth((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))}
-                  aria-label="Previous month"
-                >
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="m15 6-6 6 6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  className="icon-button"
-                  onClick={() => setVisibleMonth((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))}
-                  aria-label="Next month"
-                >
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
+              <span className={`accordion-chevron ${calendarOpen ? 'accordion-chevron-open' : ''}`} aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </button>
+
+            <div id="dashboard-calendar" className={`consistency-calendar-panel ${calendarOpen ? 'consistency-calendar-panel-open' : ''}`}>
+              <div className="consistency-calendar">
+                <div className="consistency-calendar-header">
+                  <div>
+                    <p className="eyebrow">Workout Calendar</p>
+                    <strong>{getMonthLabel(visibleMonth)}</strong>
+                  </div>
+                  <div className="calendar-nav">
+                    <button
+                      type="button"
+                      className="icon-button"
+                      onClick={() => setVisibleMonth((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))}
+                      aria-label="Previous month"
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="m15 6-6 6 6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      className="icon-button"
+                      onClick={() => setVisibleMonth((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))}
+                      aria-label="Next month"
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="calendar-weekdays">
+                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((dayLabel) => (
+                    <span key={dayLabel}>{dayLabel}</span>
+                  ))}
+                </div>
+
+                <div className="calendar-grid">
+                  {calendarDays.map((day) => {
+                    const isLogged = activityDates.includes(day.dateKey);
+                    const isPending = pendingCheckInDate === day.dateKey;
+
+                    return (
+                      <button
+                        key={day.dateKey}
+                        type="button"
+                        className={`calendar-day ${day.isCurrentMonth ? '' : 'calendar-day-outside'} ${day.isToday ? 'calendar-day-today' : ''} ${isLogged ? 'calendar-day-logged' : ''}`}
+                        onClick={() => handleToggleWorkoutDate(day.dateKey)}
+                        disabled={isPending}
+                        aria-pressed={isLogged}
+                      >
+                        <span>{day.date.getDate()}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-
-            <div className="calendar-weekdays">
-              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((dayLabel) => (
-                <span key={dayLabel}>{dayLabel}</span>
-              ))}
-            </div>
-
-            <div className="calendar-grid">
-              {calendarDays.map((day) => {
-                const isLogged = activityDates.includes(day.dateKey);
-                const isPending = pendingCheckInDate === day.dateKey;
-
-                return (
-                  <button
-                    key={day.dateKey}
-                    type="button"
-                    className={`calendar-day ${day.isCurrentMonth ? '' : 'calendar-day-outside'} ${day.isToday ? 'calendar-day-today' : ''} ${isLogged ? 'calendar-day-logged' : ''}`}
-                    onClick={() => handleToggleWorkoutDate(day.dateKey)}
-                    disabled={isPending}
-                    aria-pressed={isLogged}
-                  >
-                    <span>{day.date.getDate()}</span>
-                  </button>
-                );
-              })}
             </div>
           </div>
         </div>

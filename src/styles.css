@@ -24,9 +24,9 @@
   --danger: #ff7777;
   --danger-strong: #c94141;
   --warning: #ffd36e;
-  --shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
-  --shadow-soft: 0 16px 36px rgba(0, 0, 0, 0.28);
-  --glow: 0 0 0 1px rgba(46, 242, 179, 0.12), 0 12px 36px rgba(46, 242, 179, 0.08);
+  --shadow: 0 22px 52px rgba(0, 0, 0, 0.34);
+  --shadow-soft: 0 12px 26px rgba(0, 0, 0, 0.22);
+  --glow: 0 0 0 1px rgba(46, 242, 179, 0.08), 0 8px 22px rgba(46, 242, 179, 0.05);
   --radius-xl: 28px;
   --radius-lg: 22px;
   --radius-md: 18px;
@@ -170,6 +170,43 @@ img {
   order: 2;
 }
 
+.dashboard-summary-top {
+  position: sticky;
+  top: 12px;
+  z-index: 5;
+  padding: 16px 18px;
+}
+
+.dashboard-summary-copy-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bmi-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(46, 242, 179, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.bmi-pill-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.bmi-pill strong {
+  font-size: 1rem;
+  letter-spacing: -0.02em;
+}
+
 .dashboard-plan-panel {
   order: 1;
 }
@@ -177,40 +214,112 @@ img {
 .consistency-panel {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
+  padding: 16px 18px;
 }
 
 .consistency-overview {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .check-in-toggle {
-  min-width: 220px;
+  min-width: 182px;
+  min-height: 42px;
+  padding: 10px 14px;
 }
 
 .check-in-toggle-active {
   background: linear-gradient(135deg, rgba(46, 242, 179, 0.18), rgba(53, 215, 255, 0.1));
   border-color: rgba(46, 242, 179, 0.22);
   color: var(--text);
-  box-shadow: 0 10px 28px rgba(46, 242, 179, 0.12);
+  box-shadow: 0 8px 20px rgba(46, 242, 179, 0.08);
 }
 
-.consistency-stats-grid {
+.check-in-success-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  padding: 9px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(46, 242, 179, 0.16);
+  background: rgba(46, 242, 179, 0.08);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.consistency-metrics-strip {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 14px;
+  gap: 10px;
+}
+
+.consistency-metric-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(130, 198, 175, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.consistency-metric-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.consistency-metric-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.consistency-calendar-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.consistency-calendar-summary {
+  border: 1px solid rgba(130, 198, 175, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  color: inherit;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+}
+
+.consistency-calendar-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 220ms ease, opacity 180ms ease;
+}
+
+.consistency-calendar-panel-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.consistency-calendar-panel > * {
+  min-height: 0;
+  overflow: hidden;
 }
 
 .consistency-calendar {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 18px;
-  border-radius: 22px;
-  border: 1px solid rgba(130, 198, 175, 0.12);
-  background: rgba(255, 255, 255, 0.03);
+  gap: 12px;
+  padding: 14px 0 0;
 }
 
 .consistency-calendar-header {
@@ -243,7 +352,7 @@ img {
 }
 
 .calendar-day {
-  min-height: 42px;
+  min-height: 38px;
   border-radius: 14px;
   border: 1px solid rgba(130, 198, 175, 0.1);
   background: rgba(255, 255, 255, 0.03);
@@ -273,7 +382,7 @@ img {
   background: linear-gradient(135deg, rgba(46, 242, 179, 0.24), rgba(21, 184, 147, 0.18));
   border-color: rgba(46, 242, 179, 0.24);
   color: #04130f;
-  box-shadow: 0 0 20px rgba(46, 242, 179, 0.18);
+  box-shadow: 0 0 14px rgba(46, 242, 179, 0.12);
 }
 
 .narrow-page {
@@ -858,11 +967,11 @@ img {
 .day-card:focus-within {
   transform: translateY(-2px);
   border-color: rgba(46, 242, 179, 0.22);
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.34), 0 0 0 1px rgba(46, 242, 179, 0.08);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(46, 242, 179, 0.06);
 }
 
 .workout-accordion-card {
-  padding: 16px;
+  padding: 14px;
 }
 
 .day-card-topbar {
@@ -1103,18 +1212,6 @@ img {
   margin: 0;
 }
 
-.dashboard-stats-wrap {
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  transition: max-height 240ms ease, opacity 180ms ease;
-}
-
-.dashboard-stats-wrap.open {
-  max-height: 420px;
-  opacity: 1;
-}
-
 .day-view-list {
   display: flex;
   flex-direction: column;
@@ -1129,7 +1226,7 @@ img {
 
 .workout-focus-panel {
   padding: 22px;
-  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.36), 0 0 0 1px rgba(46, 242, 179, 0.08);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(46, 242, 179, 0.06);
 }
 
 .day-view-row {
@@ -1537,7 +1634,7 @@ img {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .consistency-stats-grid {
+  .consistency-metrics-strip {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
@@ -1579,7 +1676,7 @@ img {
   }
 
   .calendar-day {
-    min-height: 48px;
+    min-height: 44px;
   }
 
   .modal-actions {
@@ -1702,29 +1799,10 @@ img {
     transform: translateX(0);
   }
 
-  .dashboard-summary {
-    padding: 18px;
-  }
-
   .sidebar-footer .secondary-button,
   .sidebar-link-button,
   .nav-links a {
     min-height: 50px;
-  }
-
-  .summary-toggle {
-    display: inline-flex;
-    width: auto;
-    min-height: 42px;
-    padding: 10px 14px;
-  }
-
-  .dashboard-stats-wrap.open {
-    margin-top: 2px;
-  }
-
-  .stats-grid .stat-card {
-    padding: 16px;
   }
 
   .page-content {
@@ -1763,16 +1841,6 @@ img {
 
   .dashboard-plan-panel {
     order: 2;
-  }
-
-  .dashboard-stats-wrap {
-    max-height: none;
-    opacity: 1;
-    overflow: visible;
-  }
-
-  .summary-toggle {
-    display: none;
   }
 
   .panel-header-row {
