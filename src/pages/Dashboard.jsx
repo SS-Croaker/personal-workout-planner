@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import StatCard from '../components/StatCard';
 import { useAuthStore } from '../store/authStore';
 import { useFeedbackStore } from '../store/feedbackStore';
 import { useWorkoutStore } from '../store/workoutStore';
+import { getCalendarDays, getConsistencyStats, getMonthActivityCount, getMonthLabel, toDateKey } from '../utils/consistency';
 import { formatExerciseWeight, normalizeWorkoutTitle } from '../utils/plan';
 
 export default function Dashboard() {
@@ -12,6 +13,8 @@ export default function Dashboard() {
   const [expandedWorkout, setExpandedWorkout] = useState(null);
   const [planPendingDelete, setPlanPendingDelete] = useState(null);
   const [deletingPlan, setDeletingPlan] = useState(false);
+  const [visibleMonth, setVisibleMonth] = useState(() => new Date());
+  const [pendingCheckInDate, setPendingCheckInDate] = useState('');
   const user = useAuthStore((state) => state.user);
   const showToast = useFeedbackStore((state) => state.showToast);
   const profile = useWorkoutStore((state) => state.profile);
@@ -20,6 +23,7 @@ export default function Dashboard() {
   const loading = useWorkoutStore((state) => state.loading);
   const resetPlanProgress = useWorkoutStore((state) => state.resetPlanProgress);
   const deletePlan = useWorkoutStore((state) => state.deletePlan);
+  const toggleWorkoutCheckIn = useWorkoutStore((state) => state.toggleWorkoutCheckIn);
 
   useEffect(() => {
     if (!planPendingDelete) {
@@ -91,6 +95,39 @@ export default function Dashboard() {
     ) || 0;
   const overallProgressPercent =
     totalExercisesInPlan === 0 ? 0 : Math.round((completedExercisesInPlan / totalExercisesInPlan) * 100);
+  const activityDates = profile?.activity_dates || [];
+  const todayKey = toDateKey(new Date());
+  const isTrainingToday = activityDates.includes(todayKey);
+  const consistencyStats = useMemo(() => getConsistencyStats(activityDates), [activityDates]);
+  const monthWorkoutCount = useMemo(() => getMonthActivityCount(activityDates, visibleMonth), [activityDates, visibleMonth]);
+  const calendarDays = useMemo(() => getCalendarDays(visibleMonth), [visibleMonth]);
+
+  const handleToggleWorkoutDate = async (dateKey, options = {}) => {
+    if (!user?.uid) {
+      return;
+    }
+
+    setPendingCheckInDate(dateKey);
+
+    try {
+      await toggleWorkoutCheckIn(user.uid, dateKey);
+
+      if (!options.silent) {
+        const nextActive = !activityDates.includes(dateKey);
+        showToast({
+          type: 'success',
+          message: nextActive ? 'Workout day logged.' : 'Workout day removed.',
+        });
+      }
+    } catch (error) {
+      showToast({
+        type: 'error',
+        message: error.message || 'We couldn’t update your workout history right now.',
+      });
+    } finally {
+      setPendingCheckInDate('');
+    }
+  };
 
   const handleDeletePlan = async () => {
     if (!planPendingDelete) {
@@ -167,6 +204,106 @@ export default function Dashboard() {
           </Link>
         </div>
       ) : (
+        <>
+        <div className="panel consistency-panel">
+          <div className="panel-header-row">
+            <div className="consistency-overview">
+              <p className="eyebrow">Consistency</p>
+              <h3>Training today?</h3>
+              <p className="helper-text">
+                Keep your long-term gym rhythm visible, even when you reset this week’s workout progress.
+              </p>
+            </div>
+            <button
+              type="button"
+              className={`secondary-button inline-button check-in-toggle ${isTrainingToday ? 'check-in-toggle-active' : ''}`}
+              onClick={() => handleToggleWorkoutDate(todayKey)}
+              disabled={pendingCheckInDate === todayKey}
+            >
+              {pendingCheckInDate === todayKey
+                ? 'Updating...'
+                : isTrainingToday
+                  ? 'Workout Logged Today'
+                  : 'Log Workout Today'}
+            </button>
+          </div>
+
+          <div className="consistency-stats-grid">
+            <StatCard
+              label="Current Streak"
+              value={`${consistencyStats.currentStreak} Week${consistencyStats.currentStreak === 1 ? '' : 's'}`}
+              hint="A week counts when you train at least once."
+            />
+            <StatCard
+              label="Longest Streak"
+              value={`${consistencyStats.longestStreak} Week${consistencyStats.longestStreak === 1 ? '' : 's'}`}
+              hint="Your best returning-to-training run so far."
+            />
+            <StatCard
+              label="This Month"
+              value={`${monthWorkoutCount} workout day${monthWorkoutCount === 1 ? '' : 's'}`}
+              hint="Tap any day below to add or remove a workout check-in."
+            />
+          </div>
+
+          <div className="consistency-calendar">
+            <div className="consistency-calendar-header">
+              <div>
+                <p className="eyebrow">Workout Calendar</p>
+                <strong>{getMonthLabel(visibleMonth)}</strong>
+              </div>
+              <div className="calendar-nav">
+                <button
+                  type="button"
+                  className="icon-button"
+                  onClick={() => setVisibleMonth((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))}
+                  aria-label="Previous month"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m15 6-6 6 6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  className="icon-button"
+                  onClick={() => setVisibleMonth((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))}
+                  aria-label="Next month"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div className="calendar-weekdays">
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((dayLabel) => (
+                <span key={dayLabel}>{dayLabel}</span>
+              ))}
+            </div>
+
+            <div className="calendar-grid">
+              {calendarDays.map((day) => {
+                const isLogged = activityDates.includes(day.dateKey);
+                const isPending = pendingCheckInDate === day.dateKey;
+
+                return (
+                  <button
+                    key={day.dateKey}
+                    type="button"
+                    className={`calendar-day ${day.isCurrentMonth ? '' : 'calendar-day-outside'} ${day.isToday ? 'calendar-day-today' : ''} ${isLogged ? 'calendar-day-logged' : ''}`}
+                    onClick={() => handleToggleWorkoutDate(day.dateKey)}
+                    disabled={isPending}
+                    aria-pressed={isLogged}
+                  >
+                    <span>{day.date.getDate()}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
         <div className="panel dashboard-plan-panel">
           <div className="panel-header-row">
             <div className="dashboard-plan-overview">
@@ -315,6 +452,7 @@ export default function Dashboard() {
             ))}
           </div>
         </div>
+        </>
       )}
 
       {planPendingDelete ? (

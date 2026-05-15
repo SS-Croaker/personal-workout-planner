@@ -36,16 +36,22 @@ export const dbService = {
     );
   },
 
-  async saveOnboardingState(uid, completed) {
+  async saveProfileFields(uid, fields) {
     await setDoc(
       userDoc(uid),
       {
-        onboarding_completed: Boolean(completed),
-        onboarding_completed_at: serverTimestamp(),
+        ...fields,
         updated_at: serverTimestamp(),
       },
       { merge: true },
     );
+  },
+
+  async saveOnboardingState(uid, completed) {
+    await dbService.saveProfileFields(uid, {
+      onboarding_completed: Boolean(completed),
+      onboarding_completed_at: serverTimestamp(),
+    });
   },
 
   async saveProfileAndWorkoutPlans(uid, profile, workoutPlans) {

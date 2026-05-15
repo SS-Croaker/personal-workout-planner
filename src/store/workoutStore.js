@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { dbService } from '../services/dbService';
 import { storageService } from '../services/storageService';
+import { ensureDateKey, normalizeActivityDates, toggleDateKey, toDateKey } from '../utils/consistency';
 import {
   buildWorkoutPlansPayload,
   createPlanRecord,
@@ -47,7 +48,12 @@ export const useWorkoutStore = create(
               ? data.profile.onboarding_completed
               : hasExistingData;
           set({
-            profile: data.profile,
+            profile: data.profile
+              ? {
+                  ...data.profile,
+                  activity_dates: normalizeActivityDates(data.profile.activity_dates),
+                }
+              : null,
             plans: normalizedWorkoutPlans.plans,
             activePlanId: normalizedWorkoutPlans.activePlanId,
             plan: normalizedWorkoutPlans.activePlan,
@@ -69,6 +75,7 @@ export const useWorkoutStore = create(
           profile: {
             ...get().profile,
             ...profile,
+            activity_dates: normalizeActivityDates(profile.activity_dates ?? get().profile?.activity_dates),
           },
           onboardingCompleted: get().onboardingCompleted,
           sessionUid: uid,
@@ -119,6 +126,53 @@ export const useWorkoutStore = create(
           bootstrapped: true,
           hydratedThisSession: true,
         });
+      },
+
+      setWorkoutActivityDates: async (uid, activityDates) => {
+        const normalizedDates = normalizeActivityDates(activityDates);
+        const previousProfile = get().profile;
+        const nextProfile = {
+          ...(previousProfile || {}),
+          activity_dates: normalizedDates,
+        };
+
+        set({
+          profile: nextProfile,
+          sessionUid: uid,
+          bootstrapped: true,
+          hydratedThisSession: true,
+        });
+
+        try {
+          await dbService.saveProfileFields(uid, {
+            activity_dates: normalizedDates,
+          });
+        } catch (error) {
+          set({
+            profile: previousProfile,
+            sessionUid: uid,
+            bootstrapped: true,
+            hydratedThisSession: true,
+          });
+          throw error;
+        }
+      },
+
+      toggleWorkoutCheckIn: async (uid, dateKey = toDateKey(new Date())) => {
+        const currentDates = get().profile?.activity_dates || [];
+        const nextDates = toggleDateKey(currentDates, dateKey);
+        await get().setWorkoutActivityDates(uid, nextDates);
+      },
+
+      ensureWorkoutCheckIn: async (uid, dateKey = toDateKey(new Date())) => {
+        const currentDates = get().profile?.activity_dates || [];
+        const nextDates = ensureDateKey(currentDates, dateKey);
+
+        if (nextDates.length === normalizeActivityDates(currentDates).length) {
+          return;
+        }
+
+        await get().setWorkoutActivityDates(uid, nextDates);
       },
 
       saveWorkoutDay: async (uid, dayNumber, exercises, workoutTitle) => {
@@ -238,6 +292,10 @@ export const useWorkoutStore = create(
             hydratedThisSession: true,
           });
           throw error;
+        }
+
+        if (completed) {
+          await get().ensureWorkoutCheckIn(uid);
         }
       },
 
