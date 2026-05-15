@@ -1,0 +1,35 @@
+{
+  "name": "Personal Workout Planner",
+  "short_name": "Workout Planner",
+  "description": "Plan your workouts, track weekly progress, and stay consistent with a polished fitness workflow.",
+  "theme_color": "#07110f",
+  "background_color": "#07110f",
+  "display": "standalone",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/branding/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/branding/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/branding/maskable-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/branding/maskable-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

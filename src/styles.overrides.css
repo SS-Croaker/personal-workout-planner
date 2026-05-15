@@ -1,0 +1,347 @@
+:root {
+  --shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+  --shadow-soft: 0 10px 24px rgba(0, 0, 0, 0.18);
+  --glow: 0 0 0 1px rgba(46, 242, 179, 0.06), 0 6px 18px rgba(46, 242, 179, 0.04);
+}
+
+.dashboard-page {
+  gap: 14px;
+}
+
+.dashboard-summary,
+.consistency-panel,
+.dashboard-plan-panel {
+  order: initial;
+}
+
+.dashboard-summary {
+  order: 1;
+}
+
+.consistency-panel {
+  order: 2;
+}
+
+.dashboard-plan-panel {
+  order: 3;
+}
+
+.dashboard-summary-top {
+  position: static;
+  top: auto;
+  padding: 16px 18px;
+}
+
+.dashboard-summary-header {
+  align-items: center;
+}
+
+.dashboard-summary-copy-block h2 {
+  font-size: clamp(1.7rem, 3.3vw, 2.55rem);
+}
+
+.dashboard-summary-copy {
+  max-width: 46rem;
+}
+
+.bmi-pill {
+  border-color: rgba(46, 242, 179, 0.18);
+  background: linear-gradient(135deg, rgba(46, 242, 179, 0.09), rgba(53, 215, 255, 0.05));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
+.consistency-panel,
+.dashboard-plan-panel,
+.dashboard-summary-top,
+.sidebar-plan-switcher {
+  box-shadow: var(--shadow-soft);
+}
+
+.check-in-success-pill {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
+.consistency-metrics-strip {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.consistency-metric-chip {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-height: 88px;
+}
+
+.consistency-calendar-summary {
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.consistency-calendar-summary:hover,
+.consistency-calendar-summary:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(46, 242, 179, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dashboard-plan-shell {
+  gap: 18px;
+}
+
+.dashboard-plan-overview {
+  gap: 12px;
+}
+
+.active-plan-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(46, 242, 179, 0.16);
+  background:
+    radial-gradient(circle at top right, rgba(46, 242, 179, 0.14), transparent 42%),
+    linear-gradient(180deg, rgba(12, 27, 22, 0.92), rgba(9, 20, 17, 0.88));
+  box-shadow: var(--glow), var(--shadow-soft);
+}
+
+.active-plan-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.active-plan-copy h3 {
+  font-size: clamp(1.5rem, 2.4vw, 2.15rem);
+  letter-spacing: -0.04em;
+}
+
+.active-plan-support {
+  margin: 0;
+  color: var(--text-soft);
+  font-weight: 600;
+}
+
+.dashboard-progress-count {
+  font-size: 1.02rem;
+  letter-spacing: -0.02em;
+}
+
+.progress-track.dashboard-progress-track {
+  margin-top: 0;
+}
+
+.plan-controls {
+  align-items: flex-start;
+}
+
+.management-actions {
+  gap: 16px;
+}
+
+.subtle-action-link {
+  font-size: 0.95rem;
+}
+
+.workout-accordion-card {
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
+}
+
+.day-card-actions {
+  margin-top: 12px;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.sidebar-brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-brand-copy .eyebrow,
+.mobile-topbar-copy .eyebrow {
+  margin-bottom: 0;
+}
+
+.mobile-topbar-brand {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-mark {
+  flex-shrink: 0;
+  border-radius: 18px;
+  border: 1px solid rgba(130, 198, 175, 0.14);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+}
+
+.brand-mark-sidebar {
+  width: 60px;
+  height: 60px;
+}
+
+.brand-mark-topbar {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+}
+
+.sidebar-plan-switcher {
+  gap: 14px;
+  padding: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(46, 242, 179, 0.1), transparent 42%),
+    linear-gradient(180deg, rgba(14, 28, 24, 0.94), rgba(11, 20, 18, 0.88));
+}
+
+.sidebar-plan-header strong {
+  font-size: 1.22rem;
+}
+
+.plan-mode-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.plan-mode-toggle {
+  margin: 0;
+}
+
+.plan-duplicate-panel {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(130, 198, 175, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.plan-preview-grid .mini-day-card {
+  padding: 18px;
+}
+
+@media (max-width: 767px) {
+  .page-content {
+    padding-top: 10px;
+  }
+
+  .dashboard-page {
+    gap: 12px;
+  }
+
+  .dashboard-summary-top,
+  .consistency-panel,
+  .dashboard-plan-panel {
+    padding: 14px 16px;
+  }
+
+  .dashboard-summary-copy-block {
+    gap: 6px;
+  }
+
+  .dashboard-summary-copy-block h2 {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-summary-copy {
+    font-size: 0.95rem;
+  }
+
+  .consistency-metrics-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .consistency-metric-chip {
+    min-height: 74px;
+    padding: 10px 12px;
+    gap: 4px;
+  }
+
+  .consistency-metric-value {
+    font-size: 0.84rem;
+    line-height: 1.25;
+  }
+
+  .consistency-metric-label {
+    font-size: 0.72rem;
+  }
+
+  .check-in-toggle {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .active-plan-hero {
+    padding: 16px;
+    gap: 10px;
+  }
+
+  .active-plan-copy h3 {
+    font-size: 1.4rem;
+  }
+
+  .plan-controls {
+    gap: 10px;
+  }
+
+  .management-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .sidebar-brand {
+    align-items: flex-start;
+  }
+
+  .sidebar-brand-copy h1 {
+    font-size: 1.55rem;
+  }
+
+  .mobile-topbar {
+    padding: 10px 14px;
+  }
+
+  .mobile-topbar-copy strong {
+    font-size: 0.98rem;
+  }
+
+  .plan-mode-toggle {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) {
+  .page-content {
+    padding-top: 28px;
+  }
+
+  .dashboard-summary-header {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .dashboard-plan-shell {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .dashboard-plan-overview {
+    flex: 1;
+  }
+
+  .plan-controls {
+    min-width: 220px;
+    justify-content: space-between;
+  }
+
+  .plan-mode-toggle {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

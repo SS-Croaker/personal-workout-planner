@@ -94,9 +94,12 @@ export default function AppShell() {
           <span />
           <span />
         </button>
-        <div className="mobile-topbar-copy">
-          <p className="eyebrow">Personal Workout Planner</p>
-          <strong>{profile?.name ? `${profile.name}'s plan` : 'Your workout plan'}</strong>
+        <div className="mobile-topbar-brand">
+          <img src="/branding/app-icon-192.png" alt="" className="brand-mark brand-mark-topbar" />
+          <div className="mobile-topbar-copy">
+            <p className="eyebrow">Personal Workout Planner</p>
+            <strong>{profile?.name ? `${profile.name}'s plan` : 'Your workout plan'}</strong>
+          </div>
         </div>
       </header>
 
@@ -109,20 +112,21 @@ export default function AppShell() {
 
       <aside id="mobile-sidebar" className={`sidebar ${mobileMenuOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-main">
-          <p className="eyebrow">Personal Workout Planner</p>
-          <h1>Plan your workouts. Track your progress.</h1>
-          <p className="muted">
-            Everything you need is right here when you're ready to train.
-          </p>
+          <div className="sidebar-brand">
+            <img src="/branding/app-icon-192.png" alt="" className="brand-mark brand-mark-sidebar" />
+            <div className="sidebar-brand-copy">
+              <p className="eyebrow">Personal Workout Planner</p>
+              <h1>Plan your workouts. Track your progress.</h1>
+              <p className="muted">Everything you need is right here when you're ready to train.</p>
+            </div>
+          </div>
 
           {plans.length > 0 ? (
             <section className="sidebar-plan-switcher">
               <div className="sidebar-plan-header">
                 <p className="eyebrow">Active Plan</p>
                 <strong>{plan?.name || 'Workout Plan'}</strong>
-                <span className="helper-text">
-                  {plan?.days?.length || 0} workouts ready this week
-                </span>
+                <span className="helper-text">{plan?.days?.length || 0} workouts ready this week</span>
               </div>
               <label className="plan-selector">
                 <span className="helper-text">Switch plan</span>
@@ -141,10 +145,18 @@ export default function AppShell() {
           ) : null}
 
           <nav className="nav-links">
-            <NavLink to="/" onClick={closeMobileMenu}>Dashboard</NavLink>
-            <NavLink to="/create-plan" onClick={closeMobileMenu}>Create Plan</NavLink>
-            <NavLink to="/profile-setup" onClick={closeMobileMenu}>{profile ? 'Profile' : 'Set Up Profile'}</NavLink>
-            <NavLink to="/training-guide" onClick={closeMobileMenu}>Training Guide</NavLink>
+            <NavLink to="/" onClick={closeMobileMenu}>
+              Dashboard
+            </NavLink>
+            <NavLink to="/create-plan" onClick={closeMobileMenu}>
+              Create Plan
+            </NavLink>
+            <NavLink to="/profile-setup" onClick={closeMobileMenu}>
+              {profile ? 'Profile' : 'Set Up Profile'}
+            </NavLink>
+            <NavLink to="/training-guide" onClick={closeMobileMenu}>
+              Training Guide
+            </NavLink>
           </nav>
         </div>
 
