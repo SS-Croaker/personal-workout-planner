@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import { useFeedbackStore } from '../store/feedbackStore';
 import { useWorkoutStore } from '../store/workoutStore';
 import {
+  WEEKDAY_LABELS,
   getCalendarDays,
   getConsistencyStats,
   getMonthActivityCount,
@@ -315,7 +316,7 @@ export default function Dashboard() {
                   </div>
 
                   <div className="calendar-weekdays">
-                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((label) => (
+                    {WEEKDAY_LABELS.map((label) => (
                       <span key={label}>{label}</span>
                     ))}
                   </div>

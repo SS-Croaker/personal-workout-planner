@@ -2,6 +2,25 @@ function pad(value) {
   return String(value).padStart(2, '0');
 }
 
+function createLocalDate(year, monthIndex, day) {
+  return new Date(year, monthIndex, day, 12, 0, 0, 0);
+}
+
+function parseDateKey(dateKey) {
+  const [year, month, day] = dateKey.split('-').map(Number);
+  return createLocalDate(year, month - 1, day);
+}
+
+function addDays(date, days) {
+  return createLocalDate(date.getFullYear(), date.getMonth(), date.getDate() + days);
+}
+
+function getMondayIndex(date) {
+  return (date.getDay() + 6) % 7;
+}
+
+export const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
 export function toDateKey(date = new Date()) {
   const year = date.getFullYear();
   const month = pad(date.getMonth() + 1);
@@ -63,28 +82,26 @@ export function getMonthActivityCount(activityDates, visibleMonth) {
 export function getCalendarDays(visibleMonth) {
   const year = visibleMonth.getFullYear();
   const month = visibleMonth.getMonth();
-  const firstOfMonth = new Date(year, month, 1);
-  const startDay = (firstOfMonth.getDay() + 6) % 7;
-  const calendarStart = new Date(year, month, 1 - startDay);
+  const firstOfMonth = createLocalDate(year, month, 1);
+  const startDayOffset = getMondayIndex(firstOfMonth);
+  const calendarStart = addDays(firstOfMonth, -startDayOffset);
+  const todayKey = toDateKey(new Date());
 
   return Array.from({ length: 42 }, (_, index) => {
-    const day = new Date(calendarStart);
-    day.setDate(calendarStart.getDate() + index);
+    const day = addDays(calendarStart, index);
+
     return {
       date: day,
       dateKey: toDateKey(day),
       isCurrentMonth: day.getMonth() === month,
-      isToday: toDateKey(day) === toDateKey(new Date()),
+      isToday: toDateKey(day) === todayKey,
     };
   });
 }
 
 function startOfWeek(dateKey) {
-  const [year, month, day] = dateKey.split('-').map(Number);
-  const date = new Date(year, month - 1, day);
-  const dayOfWeek = (date.getDay() + 6) % 7;
-  date.setDate(date.getDate() - dayOfWeek);
-  return toDateKey(date);
+  const date = parseDateKey(dateKey);
+  return toDateKey(addDays(date, -getMondayIndex(date)));
 }
 
 export function getConsistencyStats(activityDates) {
@@ -99,8 +116,7 @@ export function getConsistencyStats(activityDates) {
     if (index === 0) {
       runningStreak = 1;
     } else {
-      const previousWeek = new Date(uniqueWeeks[index - 1]);
-      previousWeek.setDate(previousWeek.getDate() + 7);
+      const previousWeek = addDays(parseDateKey(uniqueWeeks[index - 1]), 7);
       runningStreak = toDateKey(previousWeek) === weekKey ? runningStreak + 1 : 1;
     }
 
@@ -113,8 +129,7 @@ export function getConsistencyStats(activityDates) {
   if (thisWeekIndex !== -1) {
     currentStreak = 1;
     for (let index = thisWeekIndex; index > 0; index -= 1) {
-      const previousWeek = new Date(uniqueWeeks[index]);
-      previousWeek.setDate(previousWeek.getDate() - 7);
+      const previousWeek = addDays(parseDateKey(uniqueWeeks[index]), -7);
       if (toDateKey(previousWeek) !== uniqueWeeks[index - 1]) {
         break;
       }
