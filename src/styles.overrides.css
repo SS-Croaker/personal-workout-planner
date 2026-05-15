@@ -226,6 +226,99 @@
   padding: 18px;
 }
 
+.training-guide-shell {
+  gap: 16px;
+}
+
+.training-guide-card {
+  gap: 18px;
+}
+
+.training-guide-copy {
+  gap: 12px;
+}
+
+.training-guide-step-meta {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(130, 198, 175, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-soft);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.training-guide-copy .muted {
+  max-width: 38ch;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.training-guide-highlights {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.training-guide-highlight {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--text-soft);
+  line-height: 1.55;
+}
+
+.training-guide-highlight-dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 0.48rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), var(--teal));
+  box-shadow: 0 0 14px rgba(46, 242, 179, 0.35);
+  flex-shrink: 0;
+}
+
+.training-guide-feature {
+  align-items: flex-start;
+  text-align: left;
+  padding: 20px 18px;
+  border-radius: 22px;
+}
+
+.training-guide-feature strong {
+  max-width: 18ch;
+  font-size: clamp(1.18rem, 2.7vw, 1.55rem);
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.training-guide-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.training-guide-footer a {
+  color: var(--text-soft);
+  font-weight: 600;
+  border-bottom: 1px solid rgba(46, 242, 179, 0.22);
+  transition: color 180ms ease, border-color 180ms ease;
+}
+
+.training-guide-footer a:hover,
+.training-guide-footer a:focus-visible {
+  color: var(--text);
+  border-color: rgba(46, 242, 179, 0.46);
+}
+
 @media (max-width: 767px) {
   .page-content {
     padding-top: 10px;
@@ -315,6 +408,39 @@
   .plan-mode-toggle {
     grid-template-columns: 1fr;
   }
+
+  .training-guide-shell {
+    gap: 14px;
+  }
+
+  .training-guide-card {
+    gap: 16px;
+  }
+
+  .training-guide-copy .muted {
+    font-size: 0.96rem;
+    line-height: 1.6;
+  }
+
+  .training-guide-highlight {
+    gap: 9px;
+    font-size: 0.95rem;
+  }
+
+  .training-guide-feature {
+    padding: 18px 16px;
+  }
+
+  .training-guide-feature strong {
+    max-width: 100%;
+    font-size: 1.1rem;
+  }
+
+  .training-guide-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: 0.84rem;
+  }
 }
 
 @media (min-width: 768px) {
@@ -333,6 +459,19 @@
   .dashboard-summary-header {
     flex-direction: row;
     align-items: center;
+  }
+
+  .training-guide-card {
+    grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.8fr);
+    align-items: stretch;
+  }
+
+  .training-guide-shell {
+    max-width: 980px;
+  }
+
+  .training-guide-copy h1 {
+    max-width: 12ch;
   }
 
   .dashboard-plan-shell {

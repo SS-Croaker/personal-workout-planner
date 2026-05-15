@@ -6,38 +6,75 @@ import { useWorkoutStore } from '../store/workoutStore';
 const GUIDE_STEPS = [
   {
     eyebrow: 'Welcome',
-    title: 'Your training week starts with a clear plan.',
+    title: 'Build a training week you can actually follow.',
     body:
-      'Build workouts, track every session, and keep your routine moving with a planner that stays focused on consistency.',
-    accent: 'Plan workouts. Track progress. Stay consistent.',
+      'Training feels better when your week already has structure. This guide will help you turn your routine into something clear, repeatable, and easy to come back to.',
+    accent: 'A focused home for your workouts, your progress, and your consistency.',
+    highlights: [
+      'See your week at a glance before you step into the gym.',
+      'Keep every session organized so you always know what is next.',
+      'Build momentum without turning training into admin work.',
+    ],
   },
   {
     eyebrow: 'Weekly Plans',
-    title: 'Shape each week around the way you actually train.',
+    title: 'Create plans that match your goals, schedule, and training style.',
     body:
-      'Create multiple plans, name each workout your way, and organize your week so every session has a clear role.',
-    accent: 'Multiple plans. Custom workout names. Structured training days.',
+      'Use different plans for different seasons of training. Keep one split for strength, another for cutting, and another for busy weeks when you want something simpler.',
+    accent: 'Different goals deserve different plans.',
+    highlights: [
+      'Build full weekly splits around the way you really train.',
+      'Name your workouts your way, from Chest Day to Recovery.',
+      'Switch plans anytime without losing the work you already put in.',
+    ],
+  },
+  {
+    eyebrow: 'Workouts',
+    title: 'Build each workout the way you would write it in your notes, only cleaner.',
+    body:
+      'Add your exercises, set your weights, choose your equipment, and shape each session so it is ready when you are. Once a workout is built, it becomes much easier to stay locked in.',
+    accent: 'Every workout should feel ready before the session starts.',
+    highlights: [
+      'Add exercises, weights, and equipment in one place.',
+      'Build chest days, leg days, push days, pull days, and more.',
+      'Reuse the structure you like instead of rebuilding from scratch.',
+    ],
   },
   {
     eyebrow: 'Progress',
-    title: 'Turn every workout into visible momentum.',
+    title: 'Watch your training week come together session by session.',
     body:
-      'Mark exercises complete, watch progress fill in, and reset the week whenever you need a fresh run without losing your plan.',
-    accent: 'Complete exercises. Monitor progress. Reset without losing structure.',
+      'When you complete exercises, the week starts to tell a story. You can see what is done, what is left, and where your momentum is building.',
+    accent: 'Progress should feel visible, motivating, and easy to trust.',
+    highlights: [
+      'Mark exercises complete as you move through a workout.',
+      'See each workout fill up instead of guessing how far along you are.',
+      'Reset the week when you want a fresh start without losing your structure.',
+    ],
   },
   {
-    eyebrow: 'Exercise Setup',
-    title: 'Keep every exercise organized and easy to track.',
+    eyebrow: 'Consistency',
+    title: 'Keep your rhythm going even when life is not perfect.',
     body:
-      'Add movements, choose equipment, save weights in kg or lbs, and build sessions that are clean, practical, and ready to follow.',
-    accent: 'Exercise library. Equipment. Weight units. Organized sessions.',
+      'Some weeks are full training weeks. Some are travel weeks, cardio weeks, or recovery weeks. The goal here is to help you keep showing up and see that consistency over time.',
+    accent: 'Your calendar becomes a clear picture of your momentum.',
+    highlights: [
+      'Log workout days and see your month fill in over time.',
+      'Keep a realistic consistency streak without guilt-driven pressure.',
+      'Look back at your training rhythm and stay connected to the habit.',
+    ],
   },
   {
     eyebrow: 'Ready',
-    title: 'Everything is set up for your next session.',
+    title: 'Start with one plan, then let it evolve with you.',
     body:
-      'When you are ready, head into your weekly plan, build your workouts, and start stacking completed sessions.',
-    accent: 'Train with clarity. Track with confidence.',
+      'You do not need to build the perfect routine on day one. Start with the week you want to train now, duplicate what works later, and keep shaping it as your goals change.',
+    accent: 'Built to help you train with clarity, consistency, and confidence.',
+    highlights: [
+      'Start simple and build out your first week fast.',
+      'Duplicate older plans when you want a new version of a routine you already like.',
+      'Step into every session knowing your plan is already waiting for you.',
+    ],
   },
 ];
 
@@ -117,8 +154,19 @@ export default function TrainingGuidePage() {
         <article className="training-guide-card">
           <div className="training-guide-copy">
             <p className="eyebrow">{step.eyebrow}</p>
+            <div className="training-guide-step-meta">
+              <span>{stepIndex + 1} / {GUIDE_STEPS.length}</span>
+            </div>
             <h1>{step.title}</h1>
             <p className="muted">{step.body}</p>
+            <div className="training-guide-highlights">
+              {step.highlights.map((highlight) => (
+                <div key={highlight} className="training-guide-highlight">
+                  <span className="training-guide-highlight-dot" aria-hidden="true" />
+                  <span>{highlight}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="training-guide-feature">
@@ -126,6 +174,17 @@ export default function TrainingGuidePage() {
             <strong>{step.accent}</strong>
           </div>
         </article>
+
+        <div className="training-guide-footer">
+          <span>Built by Saurabh from Celsius 233</span>
+          <a
+            href="https://www.linkedin.com/in/saurabh-singh3994/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            LinkedIn
+          </a>
+        </div>
 
         <div className="training-guide-actions">
           <button
