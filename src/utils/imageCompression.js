@@ -1,6 +1,7 @@
 import { debugLog } from './debug';
 
 const MAX_FILE_BYTES = 500 * 1024;
+export const MAX_UPLOAD_FILE_BYTES = 10 * 1024 * 1024;
 const MAX_DIMENSION = 1024;
 const MIN_QUALITY = 0.55;
 const IMAGE_PROCESSING_TIMEOUT_MS = 15000;
@@ -46,6 +47,20 @@ function getSupportedMimeType(file) {
     default:
       return '';
   }
+}
+
+export function getSupportedImageInfo(file) {
+  const contentType = getSupportedMimeType(file);
+
+  if (!contentType) {
+    return null;
+  }
+
+  const outputFormat = getOutputFormat(contentType);
+  return {
+    contentType,
+    extension: outputFormat.extension,
+  };
 }
 
 function getOutputFormat(mimeType) {
@@ -112,10 +127,11 @@ function canvasToBlob(canvas, mimeType, quality) {
 }
 
 export async function compressImageFile(file) {
-  const supportedMimeType = getSupportedMimeType(file);
-  if (!supportedMimeType) {
+  const supportedImageInfo = getSupportedImageInfo(file);
+  if (!supportedImageInfo) {
     throw new Error('Unsupported image format. Please use JPG, PNG, or WebP.');
   }
+  const supportedMimeType = supportedImageInfo.contentType;
 
   debugLog('image-upload', 'Compression starting', {
     fileName: file?.name,

@@ -16,6 +16,7 @@ const FIREBASE_ERROR_MESSAGES = {
   'storage/unknown': 'We could not upload that image right now.',
   'upload/invalid-image-type': 'Unsupported image format. Please use JPG, PNG, or WebP.',
   'upload/invalid-image-file': 'That file does not look like a valid image.',
+  'upload/image-too-large': 'That image is too large. Please choose an image under 10 MB.',
   'upload/image-processing-timeout': 'Image preparation took too long. Please try a smaller image.',
   'upload/image-upload-timeout': 'Image upload took too long. Please try again.',
   'upload/save-timeout': 'Saving the workout took too long. Please try again.',

@@ -3,6 +3,7 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useFeedbackStore } from '../store/feedbackStore';
 import { useWorkoutStore } from '../store/workoutStore';
+import { debugLog } from '../utils/debug';
 import {
   formatExerciseWeight,
   getExerciseEquipmentLabel,
@@ -130,6 +131,10 @@ export default function DayView() {
                       alt={exercise.name || `Exercise ${index + 1}`}
                       className="day-view-thumbnail"
                       onError={(event) => {
+                        debugLog('image-upload', 'Workout view thumbnail failed to render', {
+                          imageUrl: exercise.image_url,
+                          exerciseName: exercise.name,
+                        });
                         event.currentTarget.style.display = 'none';
                         if (event.currentTarget.parentElement) {
                           event.currentTarget.parentElement.style.display = 'none';

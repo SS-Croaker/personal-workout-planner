@@ -1,6 +1,6 @@
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { storage } from './firebase';
-import { compressImageFile } from '../utils/imageCompression';
+import { MAX_UPLOAD_FILE_BYTES, compressImageFile, getSupportedImageInfo } from '../utils/imageCompression';
 import { getFriendlyErrorMessage } from '../utils/errors';
 import { debugLog } from '../utils/debug';
 
@@ -12,24 +12,58 @@ function sanitizeFileName(name) {
 
 function uploadBlobWithTimeout(imageRef, filePayload, metadata) {
   return new Promise((resolve, reject) => {
+    let settled = false;
     const uploadTask = uploadBytesResumable(imageRef, filePayload, metadata);
-    const timeoutId = window.setTimeout(() => {
-      debugLog('image-upload', 'Upload timed out and was cancelled', {
-        path: imageRef.fullPath,
-      });
-      uploadTask.cancel();
-      reject(new Error('Image upload took too long. Please try again.'));
-    }, IMAGE_UPLOAD_TIMEOUT_MS);
+    let timeoutId = 0;
+
+    const clearUploadTimeout = () => {
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+
+    const startUploadTimeout = () => {
+      clearUploadTimeout();
+      timeoutId = window.setTimeout(() => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        debugLog('image-upload', 'Upload timed out and was cancelled', {
+          path: imageRef.fullPath,
+        });
+        uploadTask.cancel();
+        reject(new Error('Connection issue during upload. Please try again.'));
+      }, IMAGE_UPLOAD_TIMEOUT_MS);
+    };
+
+    startUploadTimeout();
 
     uploadTask.on(
       'state_changed',
-      undefined,
+      (snapshot) => {
+        debugLog('image-upload', 'Upload progress', {
+          path: imageRef.fullPath,
+          bytesTransferred: snapshot.bytesTransferred,
+          totalBytes: snapshot.totalBytes,
+          state: snapshot.state,
+        });
+        startUploadTimeout();
+      },
       (error) => {
-        window.clearTimeout(timeoutId);
+        if (settled) {
+          return;
+        }
+        settled = true;
+        clearUploadTimeout();
         reject(error);
       },
       () => {
-        window.clearTimeout(timeoutId);
+        if (settled) {
+          return;
+        }
+        settled = true;
+        clearUploadTimeout();
         resolve(uploadTask.snapshot.ref);
       },
     );
@@ -48,7 +82,28 @@ export const storageService = {
         fileSize: file?.size,
       });
 
-      const { blob, contentType, extension } = await compressImageFile(file);
+      const supportedImageInfo = getSupportedImageInfo(file);
+      if (!supportedImageInfo) {
+        throw new Error('Unsupported image format. Please use JPG, PNG, or WebP.');
+      }
+
+      let uploadPayload;
+      try {
+        uploadPayload = await compressImageFile(file);
+      } catch (compressionError) {
+        debugLog('image-upload', 'Compression failed, falling back to original file', compressionError);
+        if (file.size > MAX_UPLOAD_FILE_BYTES) {
+          throw new Error('That image is too large. Please choose an image under 10 MB.');
+        }
+
+        uploadPayload = {
+          blob: file,
+          contentType: supportedImageInfo.contentType,
+          extension: supportedImageInfo.extension,
+        };
+      }
+
+      const { blob, contentType, extension } = uploadPayload;
       const fileName = `${Date.now()}-${sanitizeFileName(exerciseName || 'exercise')}.${extension}`;
       const imageRef = ref(storage, `users/${uid}/workouts/day-${dayNumber}/${fileName}`);
 

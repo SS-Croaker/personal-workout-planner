@@ -49,6 +49,7 @@ const COMMON_EXERCISES = [
 ];
 
 const SUPPORTED_IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp']);
+const MAX_UPLOAD_FILE_BYTES = 10 * 1024 * 1024;
 
 function isSupportedImageFile(file) {
   const mimeType = String(file?.type || '').toLowerCase();
@@ -219,6 +220,16 @@ export default function DayEditor() {
 
     if (!isSupportedImageFile(file)) {
       const message = 'Unsupported image format. Please use JPG, PNG, or WebP.';
+      setError(message);
+      showToast({
+        type: 'error',
+        message,
+      });
+      return;
+    }
+
+    if (file.size > MAX_UPLOAD_FILE_BYTES) {
+      const message = 'That image is too large. Please choose an image under 10 MB.';
       setError(message);
       showToast({
         type: 'error',
