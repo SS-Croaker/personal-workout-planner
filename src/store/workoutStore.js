@@ -198,8 +198,10 @@ export const useWorkoutStore = create(
         if (!currentPlan) {
           throw new Error('Workout plan not found.');
         }
+        const traceId = `workout-${dayNumber}-${Date.now()}`;
 
         debugLog('workout-save', 'Workout save starting', {
+          traceId,
           uid,
           dayNumber,
           exerciseCount: exercises.length,
@@ -207,6 +209,7 @@ export const useWorkoutStore = create(
 
         try {
           const nextDays = [];
+          const imageUploadWarnings = [];
 
           for (const day of currentPlan.days) {
             if (day.day_number !== dayNumber) {
@@ -223,10 +226,33 @@ export const useWorkoutStore = create(
               let imageUrl = exercise.image_url || '';
               if (exercise.imageFile) {
                 debugLog('workout-save', 'Uploading exercise image', {
+                  traceId,
                   dayNumber,
                   exerciseName: exercise.name,
+                  fileName: exercise.imageFile.name,
+                  fileType: exercise.imageFile.type,
+                  fileSize: exercise.imageFile.size,
                 });
-                imageUrl = await storageService.uploadExerciseImage(uid, dayNumber, exercise.name, exercise.imageFile);
+                try {
+                  imageUrl = await storageService.uploadExerciseImage(uid, dayNumber, exercise.name, exercise.imageFile, {
+                    traceId,
+                    exerciseName: exercise.name,
+                  });
+                } catch (uploadError) {
+                  imageUploadWarnings.push({
+                    exerciseName: exercise.name || `Exercise ${nextExercises.length + 1}`,
+                    message: getFriendlyErrorMessage(uploadError, 'We could not upload that image right now.'),
+                  });
+
+                  debugLog('workout-save', 'Image upload failed, continuing without image', {
+                    traceId,
+                    dayNumber,
+                    exerciseName: exercise.name,
+                    code: uploadError?.code,
+                    message: uploadError?.message,
+                    name: uploadError?.name,
+                  });
+                }
               }
 
               nextExercises.push({
@@ -255,11 +281,13 @@ export const useWorkoutStore = create(
           const payload = buildWorkoutPlansPayload(nextPlans, activePlanId);
 
           debugLog('workout-save', 'Saving workout plan document', {
+            traceId,
             activePlanId,
             dayNumber,
           });
           await dbService.saveWorkoutPlans(uid, payload);
           debugLog('workout-save', 'Workout save complete', {
+            traceId,
             activePlanId,
             dayNumber,
           });
@@ -272,8 +300,17 @@ export const useWorkoutStore = create(
             hydratedThisSession: true,
             bootstrapError: '',
           });
+
+          return {
+            imageUploadWarnings,
+          };
         } catch (error) {
-          debugLog('workout-save', 'Workout save failed', error);
+          debugLog('workout-save', 'Workout save failed', {
+            traceId,
+            code: error?.code,
+            message: error?.message,
+            name: error?.name,
+          });
           throw new Error(getFriendlyErrorMessage(error, 'We could not save your workout right now.'));
         }
       },

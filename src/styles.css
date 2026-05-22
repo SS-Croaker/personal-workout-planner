@@ -1531,6 +1531,10 @@ img {
   border-color: rgba(255, 119, 119, 0.22);
 }
 
+.toast-info {
+  border-color: rgba(255, 211, 110, 0.18);
+}
+
 .toast-dismiss {
   border: none;
   background: transparent;

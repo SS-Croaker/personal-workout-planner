@@ -10,6 +10,7 @@ import {
   normalizeWorkoutTitle,
   WORKOUT_NAME_SUGGESTIONS,
 } from '../utils/plan';
+import { debugLog } from '../utils/debug';
 
 const COMMON_EXERCISES = [
   'Barbell Back Squat',
@@ -215,8 +216,20 @@ export default function DayEditor() {
 
   const updateExerciseImage = (index, file) => {
     if (!file) {
+      debugLog('image-upload', 'File selection cancelled', {
+        dayNumber: parsedDayNumber,
+        exerciseIndex: index,
+      });
       return;
     }
+
+    debugLog('image-upload', 'File selected', {
+      dayNumber: parsedDayNumber,
+      exerciseIndex: index,
+      fileName: file.name,
+      fileType: file.type,
+      fileSize: file.size,
+    });
 
     if (!isSupportedImageFile(file)) {
       const message = 'Unsupported image format. Please use JPG, PNG, or WebP.';
@@ -301,11 +314,27 @@ export default function DayEditor() {
     setSaving(true);
 
     try {
-      await saveWorkoutDay(user.uid, draft.day_number, draft.exercises, draft.title);
-      showToast({
-        type: 'success',
-        message: `${normalizeWorkoutTitle(draft.title, draft.day_number)} is saved and ready.`,
-      });
+      const saveResult = await saveWorkoutDay(user.uid, draft.day_number, draft.exercises, draft.title);
+      const uploadWarningCount = saveResult?.imageUploadWarnings?.length || 0;
+
+      if (uploadWarningCount > 0) {
+        const warningMessage =
+          uploadWarningCount === 1
+            ? `${normalizeWorkoutTitle(draft.title, draft.day_number)} was saved, but 1 image could not be attached.`
+            : `${normalizeWorkoutTitle(draft.title, draft.day_number)} was saved, but ${uploadWarningCount} images could not be attached.`;
+
+        showToast({
+          type: 'info',
+          message: warningMessage,
+          duration: 4200,
+        });
+      } else {
+        showToast({
+          type: 'success',
+          message: `${normalizeWorkoutTitle(draft.title, draft.day_number)} is saved and ready.`,
+        });
+      }
+
       navigate(`/day/${draft.day_number}`, { replace: true });
     } catch (saveError) {
       const message = saveError.message || 'We couldn’t save your workout right now.';
