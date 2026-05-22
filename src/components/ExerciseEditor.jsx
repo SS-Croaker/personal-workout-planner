@@ -123,7 +123,11 @@ export default function ExerciseEditor({
 
         <label className="exercise-field exercise-field-image">
           <span>Exercise image</span>
-          <input type="file" accept="image/*" onChange={(event) => onImageChange(index, event.target.files?.[0])} />
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/*"
+            onChange={(event) => onImageChange(index, event.target.files?.[0])}
+          />
         </label>
       </div>
 

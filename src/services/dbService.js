@@ -4,6 +4,7 @@ import { getFriendlyErrorMessage } from '../utils/errors';
 
 const usersCollection = 'users';
 const workoutPlansCollection = 'workoutPlans';
+const DB_OPERATION_TIMEOUT_MS = 15000;
 
 function userDoc(uid) {
   return doc(db, usersCollection, uid);
@@ -15,7 +16,21 @@ function workoutPlanDoc(uid) {
 
 async function withDbError(operation, fallback) {
   try {
-    return await operation();
+    return await new Promise((resolve, reject) => {
+      const timeoutId = window.setTimeout(() => {
+        reject(new Error('Saving the workout took too long. Please try again.'));
+      }, DB_OPERATION_TIMEOUT_MS);
+
+      operation()
+        .then((value) => {
+          window.clearTimeout(timeoutId);
+          resolve(value);
+        })
+        .catch((error) => {
+          window.clearTimeout(timeoutId);
+          reject(error);
+        });
+    });
   } catch (error) {
     throw new Error(getFriendlyErrorMessage(error, fallback));
   }

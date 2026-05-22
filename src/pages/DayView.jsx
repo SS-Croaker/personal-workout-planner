@@ -123,6 +123,21 @@ export default function DayView() {
                 <div className="day-view-meta">
                   <span>{getExerciseEquipmentLabel(exercise.equipment)}</span>
                 </div>
+                {exercise.image_url ? (
+                  <div className="day-view-thumbnail-wrap">
+                    <img
+                      src={exercise.image_url}
+                      alt={exercise.name || `Exercise ${index + 1}`}
+                      className="day-view-thumbnail"
+                      onError={(event) => {
+                        event.currentTarget.style.display = 'none';
+                        if (event.currentTarget.parentElement) {
+                          event.currentTarget.parentElement.style.display = 'none';
+                        }
+                      }}
+                    />
+                  </div>
+                ) : null}
               </label>
             ))}
           </div>

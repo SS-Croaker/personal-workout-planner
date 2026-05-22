@@ -1,6 +1,82 @@
+import { debugLog } from './debug';
+
 const MAX_FILE_BYTES = 500 * 1024;
 const MAX_DIMENSION = 1024;
 const MIN_QUALITY = 0.55;
+const IMAGE_PROCESSING_TIMEOUT_MS = 15000;
+const SUPPORTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp']);
+
+function withTimeout(promise, timeoutMs, error) {
+  return new Promise((resolve, reject) => {
+    const timeoutId = window.setTimeout(() => {
+      reject(error);
+    }, timeoutMs);
+
+    promise
+      .then((value) => {
+        window.clearTimeout(timeoutId);
+        resolve(value);
+      })
+      .catch((reason) => {
+        window.clearTimeout(timeoutId);
+        reject(reason);
+      });
+  });
+}
+
+function getFileExtension(file) {
+  const parts = String(file?.name || '').toLowerCase().split('.');
+  return parts.length > 1 ? parts.at(-1) : '';
+}
+
+function getSupportedMimeType(file) {
+  const explicitType = String(file?.type || '').toLowerCase();
+  if (SUPPORTED_IMAGE_TYPES.has(explicitType)) {
+    return explicitType === 'image/jpg' ? 'image/jpeg' : explicitType;
+  }
+
+  switch (getFileExtension(file)) {
+    case 'jpg':
+    case 'jpeg':
+      return 'image/jpeg';
+    case 'png':
+      return 'image/png';
+    case 'webp':
+      return 'image/webp';
+    default:
+      return '';
+  }
+}
+
+function getOutputFormat(mimeType) {
+  if (mimeType === 'image/png') {
+    return {
+      contentType: 'image/png',
+      extension: 'png',
+      initialQuality: undefined,
+      qualityStep: 0,
+      minQuality: undefined,
+    };
+  }
+
+  if (mimeType === 'image/webp') {
+    return {
+      contentType: 'image/webp',
+      extension: 'webp',
+      initialQuality: 0.9,
+      qualityStep: 0.1,
+      minQuality: MIN_QUALITY,
+    };
+  }
+
+  return {
+    contentType: 'image/jpeg',
+    extension: 'jpg',
+    initialQuality: 0.9,
+    qualityStep: 0.1,
+    minQuality: MIN_QUALITY,
+  };
+}
 
 function loadImage(file) {
   return new Promise((resolve, reject) => {
@@ -13,13 +89,13 @@ function loadImage(file) {
     };
     image.onerror = () => {
       URL.revokeObjectURL(objectUrl);
-      reject(new Error('Unable to load image.'));
+      reject(new Error('Unsupported image format. Please use JPG, PNG, or WebP.'));
     };
     image.src = objectUrl;
   });
 }
 
-function canvasToBlob(canvas, quality) {
+function canvasToBlob(canvas, mimeType, quality) {
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
@@ -29,18 +105,33 @@ function canvasToBlob(canvas, quality) {
         }
         resolve(blob);
       },
-      'image/jpeg',
+      mimeType,
       quality,
     );
   });
 }
 
 export async function compressImageFile(file) {
-  const image = await loadImage(file);
+  const supportedMimeType = getSupportedMimeType(file);
+  if (!supportedMimeType) {
+    throw new Error('Unsupported image format. Please use JPG, PNG, or WebP.');
+  }
+
+  debugLog('image-upload', 'Compression starting', {
+    fileName: file?.name,
+    fileType: file?.type || supportedMimeType,
+    fileSize: file?.size,
+  });
+
+  const image = await withTimeout(
+    loadImage(file),
+    IMAGE_PROCESSING_TIMEOUT_MS,
+    new Error('Image preparation took too long. Please try a smaller image.'),
+  );
   const scale = Math.min(MAX_DIMENSION / image.width, MAX_DIMENSION / image.height, 1);
   const canvas = document.createElement('canvas');
-  canvas.width = Math.round(image.width * scale);
-  canvas.height = Math.round(image.height * scale);
+  canvas.width = Math.max(1, Math.round(image.width * scale));
+  canvas.height = Math.max(1, Math.round(image.height * scale));
 
   const context = canvas.getContext('2d');
   if (!context) {
@@ -48,17 +139,42 @@ export async function compressImageFile(file) {
   }
   context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-  let quality = 0.9;
-  let blob = await canvasToBlob(canvas, quality);
+  const outputFormat = getOutputFormat(supportedMimeType);
+  let quality = outputFormat.initialQuality;
+  let blob = await withTimeout(
+    canvasToBlob(canvas, outputFormat.contentType, quality),
+    IMAGE_PROCESSING_TIMEOUT_MS,
+    new Error('Image preparation took too long. Please try a smaller image.'),
+  );
 
-  while (blob.size > MAX_FILE_BYTES && quality > MIN_QUALITY) {
-    quality -= 0.1;
-    blob = await canvasToBlob(canvas, quality);
+  while (
+    blob.size > MAX_FILE_BYTES &&
+    typeof quality === 'number' &&
+    typeof outputFormat.minQuality === 'number' &&
+    quality > outputFormat.minQuality
+  ) {
+    quality = Math.max(outputFormat.minQuality, quality - outputFormat.qualityStep);
+    blob = await withTimeout(
+      canvasToBlob(canvas, outputFormat.contentType, quality),
+      IMAGE_PROCESSING_TIMEOUT_MS,
+      new Error('Image preparation took too long. Please try a smaller image.'),
+    );
   }
 
   if (blob.size > MAX_FILE_BYTES) {
     throw new Error('Image is still too large after compression. Try a smaller image.');
   }
 
-  return blob;
+  debugLog('image-upload', 'Compression complete', {
+    outputType: outputFormat.contentType,
+    outputSize: blob.size,
+    width: canvas.width,
+    height: canvas.height,
+  });
+
+  return {
+    blob,
+    contentType: outputFormat.contentType,
+    extension: outputFormat.extension,
+  };
 }

@@ -48,6 +48,18 @@ const COMMON_EXERCISES = [
   'Rowing Machine',
 ];
 
+const SUPPORTED_IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp']);
+
+function isSupportedImageFile(file) {
+  const mimeType = String(file?.type || '').toLowerCase();
+  if (['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(mimeType)) {
+    return true;
+  }
+
+  const extension = String(file?.name || '').toLowerCase().split('.').at(-1);
+  return SUPPORTED_IMAGE_EXTENSIONS.has(extension);
+}
+
 function normalizeSuggestionValue(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
@@ -204,6 +216,18 @@ export default function DayEditor() {
     if (!file) {
       return;
     }
+
+    if (!isSupportedImageFile(file)) {
+      const message = 'Unsupported image format. Please use JPG, PNG, or WebP.';
+      setError(message);
+      showToast({
+        type: 'error',
+        message,
+      });
+      return;
+    }
+
+    setError('');
 
     setDraft((current) => {
       const exercises = current.exercises.map((exercise, exerciseIndex) =>

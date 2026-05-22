@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { dbService } from '../services/dbService';
 import { storageService } from '../services/storageService';
+import { debugLog } from '../utils/debug';
 import { ensureDateKey, normalizeActivityDates, toggleDateKey, toDateKey } from '../utils/consistency';
 import { getFriendlyErrorMessage } from '../utils/errors';
 import {
@@ -198,60 +199,83 @@ export const useWorkoutStore = create(
           throw new Error('Workout plan not found.');
         }
 
-        const nextDays = [];
+        debugLog('workout-save', 'Workout save starting', {
+          uid,
+          dayNumber,
+          exerciseCount: exercises.length,
+        });
 
-        for (const day of currentPlan.days) {
-          if (day.day_number !== dayNumber) {
-            nextDays.push(day);
-            continue;
-          }
+        try {
+          const nextDays = [];
 
-          const nextExercises = [];
-          for (const exercise of exercises) {
-            if (!exercise.name && !exercise.weight && !exercise.image_url && !exercise.imageFile) {
+          for (const day of currentPlan.days) {
+            if (day.day_number !== dayNumber) {
+              nextDays.push(day);
               continue;
             }
 
-            let imageUrl = exercise.image_url || '';
-            if (exercise.imageFile) {
-              imageUrl = await storageService.uploadExerciseImage(uid, dayNumber, exercise.name, exercise.imageFile);
+            const nextExercises = [];
+            for (const exercise of exercises) {
+              if (!exercise.name && !exercise.weight && !exercise.image_url && !exercise.imageFile) {
+                continue;
+              }
+
+              let imageUrl = exercise.image_url || '';
+              if (exercise.imageFile) {
+                debugLog('workout-save', 'Uploading exercise image', {
+                  dayNumber,
+                  exerciseName: exercise.name,
+                });
+                imageUrl = await storageService.uploadExerciseImage(uid, dayNumber, exercise.name, exercise.imageFile);
+              }
+
+              nextExercises.push({
+                name: exercise.name,
+                type: normalizeExerciseType(exercise.type),
+                equipment: normalizeExerciseEquipment(exercise.equipment),
+                weight: Number(exercise.weight) || 0,
+                weight_unit: normalizeWeightUnit(exercise.weight_unit),
+                completed: Boolean(exercise.completed),
+                image_url: imageUrl,
+              });
             }
 
-            nextExercises.push({
-              name: exercise.name,
-              type: normalizeExerciseType(exercise.type),
-              equipment: normalizeExerciseEquipment(exercise.equipment),
-              weight: Number(exercise.weight) || 0,
-              weight_unit: normalizeWeightUnit(exercise.weight_unit),
-              completed: Boolean(exercise.completed),
-              image_url: imageUrl,
+            nextDays.push({
+              ...day,
+              title: normalizeWorkoutTitle(workoutTitle, dayNumber),
+              exercises: nextExercises,
             });
           }
 
-          nextDays.push({
-            ...day,
-            title: normalizeWorkoutTitle(workoutTitle, dayNumber),
-            exercises: nextExercises,
+          const nextPlan = {
+            ...currentPlan,
+            days: nextDays,
+          };
+          const nextPlans = currentPlans.map((plan) => (plan.id === currentPlan.id ? nextPlan : plan));
+          const payload = buildWorkoutPlansPayload(nextPlans, activePlanId);
+
+          debugLog('workout-save', 'Saving workout plan document', {
+            activePlanId,
+            dayNumber,
           });
+          await dbService.saveWorkoutPlans(uid, payload);
+          debugLog('workout-save', 'Workout save complete', {
+            activePlanId,
+            dayNumber,
+          });
+          set({
+            plans: payload.plans,
+            activePlanId,
+            plan: payload.plans.find((plan) => plan.id === activePlanId) || nextPlan,
+            sessionUid: uid,
+            bootstrapped: true,
+            hydratedThisSession: true,
+            bootstrapError: '',
+          });
+        } catch (error) {
+          debugLog('workout-save', 'Workout save failed', error);
+          throw new Error(getFriendlyErrorMessage(error, 'We could not save your workout right now.'));
         }
-
-        const nextPlan = {
-          ...currentPlan,
-          days: nextDays,
-        };
-        const nextPlans = currentPlans.map((plan) => (plan.id === currentPlan.id ? nextPlan : plan));
-        const payload = buildWorkoutPlansPayload(nextPlans, activePlanId);
-
-        await dbService.saveWorkoutPlans(uid, payload);
-        set({
-          plans: payload.plans,
-          activePlanId,
-          plan: payload.plans.find((plan) => plan.id === activePlanId) || nextPlan,
-          sessionUid: uid,
-          bootstrapped: true,
-          hydratedThisSession: true,
-          bootstrapError: '',
-        });
       },
 
       toggleExerciseCompletion: async (uid, dayNumber, exerciseIndex, completed) => {
