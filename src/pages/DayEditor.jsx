@@ -11,6 +11,7 @@ import {
   WORKOUT_NAME_SUGGESTIONS,
 } from '../utils/plan';
 import { debugLog } from '../utils/debug';
+import { getFriendlyErrorMessage } from '../utils/errors';
 
 const COMMON_EXERCISES = [
   'Barbell Back Squat',
@@ -323,7 +324,7 @@ export default function DayEditor() {
 
       navigate(`/day/${draft.day_number}`, { replace: true });
     } catch (saveError) {
-      const message = saveError.message || 'We couldn’t save your workout right now.';
+      const message = getFriendlyErrorMessage(saveError, 'We could not save your workout right now.');
       setError(message);
       showToast({
         type: 'error',

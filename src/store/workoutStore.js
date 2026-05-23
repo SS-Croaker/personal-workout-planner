@@ -238,7 +238,12 @@ export const useWorkoutStore = create(
                     exerciseName: exercise.name,
                   });
                 } catch (uploadError) {
-                  console.error('[image-upload] upload failed:', uploadError?.code, uploadError?.message, uploadError);
+                  debugLog('image-upload', 'Upload failed in workout save', {
+                    traceId,
+                    code: uploadError?.code,
+                    message: uploadError?.message,
+                    name: uploadError?.name,
+                  });
                   throw uploadError;
                 }
               }
@@ -296,7 +301,7 @@ export const useWorkoutStore = create(
             message: error?.message,
             name: error?.name,
           });
-          throw new Error(getFriendlyErrorMessage(error, 'We could not save your workout right now.'));
+          throw error;
         }
       },
 
