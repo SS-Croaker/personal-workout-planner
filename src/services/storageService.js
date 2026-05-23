@@ -124,8 +124,6 @@ async function uploadOriginalImage(uid, dayNumber, exerciseName, file, debugCont
     throw error;
   }
 
-  await verifyStorageBucket(debugContext);
-
   const imagePath = buildImagePath(uid, dayNumber, exerciseName, supportedImageInfo.extension);
   const imageRef = ref(storage, imagePath);
   const metadata = {
