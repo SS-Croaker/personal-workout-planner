@@ -239,6 +239,7 @@ export const useWorkoutStore = create(
 
             const nextExercises = [];
             for (const exercise of exercises) {
+              console.log('EXERCISE BEFORE', exercise);
               if (!exercise.name && !exercise.weight && !exercise.image_url && !exercise.imageFile) {
                 continue;
               }
@@ -283,6 +284,8 @@ export const useWorkoutStore = create(
               }
 
               const persistedExercise = serializeExerciseForSave(exercise, imageUrl);
+              console.log('EXERCISE AFTER', persistedExercise);
+              console.log('IMAGE URL FIELD', persistedExercise.image_url);
 
               debugLog('workout-save', 'Exercise prepared for Firestore save', {
                 traceId,
@@ -309,6 +312,7 @@ export const useWorkoutStore = create(
           };
           const nextPlans = currentPlans.map((plan) => (plan.id === currentPlan.id ? nextPlan : plan));
           const payload = buildWorkoutPlansPayload(nextPlans, activePlanId);
+          console.log('FINAL WORKOUT PAYLOAD', payload);
 
           debugLog('workout-save', 'Saving workout plan document', {
             traceId,

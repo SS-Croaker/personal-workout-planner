@@ -109,6 +109,7 @@ export const dbService = {
   },
 
   async saveWorkoutPlans(uid, workoutPlans) {
+    console.log('FINAL WORKOUT PAYLOAD', workoutPlans);
     await withDbError(
       () => setDoc(
         workoutPlanDoc(uid),

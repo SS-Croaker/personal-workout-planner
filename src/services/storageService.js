@@ -156,6 +156,7 @@ async function uploadOriginalImage(uid, dayNumber, exerciseName, file, debugCont
   });
 
   const downloadUrl = await getDownloadURL(snapshot.ref);
+  console.log('DOWNLOAD URL', downloadUrl);
 
   debugLog('image-upload', 'Download URL created', {
     ...debugContext,
