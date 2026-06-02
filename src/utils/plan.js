@@ -123,6 +123,12 @@ export function normalizeExercise(exercise) {
     equipment: normalizeExerciseEquipment(exercise?.equipment),
     weight_unit: normalizeWeightUnit(exercise?.weight_unit),
     completed: normalizeExerciseCompletion(exercise?.completed),
+    image_url:
+      typeof exercise?.image_url === 'string'
+        ? exercise.image_url
+        : typeof exercise?.imageUrl === 'string'
+          ? exercise.imageUrl
+          : '',
   };
 }
 

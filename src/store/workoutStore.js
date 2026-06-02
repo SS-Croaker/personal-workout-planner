@@ -16,6 +16,26 @@ import {
   normalizeWorkoutPlansDoc,
 } from '../utils/plan';
 
+function serializeExerciseForSave(exercise, imageUrlOverride) {
+  const normalizedExercise = normalizeExercise(exercise);
+  const persistedImageUrl =
+    typeof imageUrlOverride === 'string'
+      ? imageUrlOverride
+      : typeof normalizedExercise.image_url === 'string'
+        ? normalizedExercise.image_url
+        : '';
+
+  return {
+    name: normalizedExercise.name || '',
+    type: normalizeExerciseType(normalizedExercise.type),
+    equipment: normalizeExerciseEquipment(normalizedExercise.equipment),
+    weight: Number(normalizedExercise.weight) || 0,
+    weight_unit: normalizeWeightUnit(normalizedExercise.weight_unit),
+    completed: Boolean(normalizedExercise.completed),
+    image_url: persistedImageUrl,
+  };
+}
+
 export const useWorkoutStore = create(
   persist(
     (set, get) => ({
@@ -238,6 +258,13 @@ export const useWorkoutStore = create(
                     traceId,
                     exerciseName: exercise.name,
                   });
+                  debugLog('workout-save', 'Exercise image upload returned download URL', {
+                    traceId,
+                    dayNumber,
+                    exerciseName: exercise.name,
+                    hasImageUrl: Boolean(imageUrl),
+                    imageUrlPreview: imageUrl ? imageUrl.slice(0, 120) : '',
+                  });
                 } catch (uploadError) {
                   imageUploadWarnings.push({
                     exerciseName: exercise.name || `Exercise ${nextExercises.length + 1}`,
@@ -255,15 +282,18 @@ export const useWorkoutStore = create(
                 }
               }
 
-              nextExercises.push({
-                name: exercise.name,
-                type: normalizeExerciseType(exercise.type),
-                equipment: normalizeExerciseEquipment(exercise.equipment),
-                weight: Number(exercise.weight) || 0,
-                weight_unit: normalizeWeightUnit(exercise.weight_unit),
-                completed: Boolean(exercise.completed),
-                image_url: imageUrl,
+              const persistedExercise = serializeExerciseForSave(exercise, imageUrl);
+
+              debugLog('workout-save', 'Exercise prepared for Firestore save', {
+                traceId,
+                dayNumber,
+                exerciseName: persistedExercise.name,
+                hasImageFile: Boolean(exercise.imageFile),
+                hasPersistedImageUrl: Boolean(persistedExercise.image_url),
+                imageUrlPreview: persistedExercise.image_url ? persistedExercise.image_url.slice(0, 120) : '',
               });
+
+              nextExercises.push(persistedExercise);
             }
 
             nextDays.push({
@@ -284,6 +314,13 @@ export const useWorkoutStore = create(
             traceId,
             activePlanId,
             dayNumber,
+            savedExerciseImageUrls: nextPlan.days
+              .find((day) => day.day_number === dayNumber)
+              ?.exercises.map((exercise, index) => ({
+                index,
+                name: exercise.name,
+                hasImageUrl: Boolean(exercise.image_url),
+              })) || [],
           });
           await dbService.saveWorkoutPlans(uid, payload);
           debugLog('workout-save', 'Workout save complete', {
