@@ -257,6 +257,7 @@ export const useWorkoutStore = create(
                 try {
                   imageUrl = await storageService.uploadExerciseImage(uid, dayNumber, exercise.name, exercise.imageFile, {
                     traceId,
+                    component: 'DayEditor',
                     exerciseName: exercise.name,
                   });
                   debugLog('workout-save', 'Exercise image upload returned download URL', {

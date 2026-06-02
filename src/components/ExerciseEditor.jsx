@@ -139,6 +139,8 @@ export default function ExerciseEditor({
 
       {exercise.image_url ? (
         <div className="image-preview-row">
+          {console.log('IMAGE URL PASSED TO COMPONENT', exercise.image_url)}
+          {console.log('IMAGE COMPONENT SRC', exercise.image_url)}
           <img src={exercise.image_url} alt={exercise.name || `Exercise ${index + 1}`} className="image-preview" />
           <p className="helper-text compact-helper-text">Image ready</p>
         </div>

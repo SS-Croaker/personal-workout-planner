@@ -104,47 +104,53 @@ export default function DayView() {
           </div>
         ) : (
           <div className="day-view-list">
-            {selectedDay.exercises.map((exercise, index) => (
-              <label
-                key={`${exercise.name || 'exercise'}-${index}`}
-                className={`day-view-row ${exercise.completed ? 'day-view-row-complete' : ''}`}
-              >
-                <input
-                  type="checkbox"
-                  checked={Boolean(exercise.completed)}
-                  onChange={(event) => handleToggleCompletion(index, event.target.checked)}
-                />
-                <div className="day-view-main">
-                  <strong className="day-view-name">{exercise.name || `Exercise ${index + 1}`}</strong>
-                  <span className="helper-text day-view-mobile-meta">
-                    {formatExerciseWeight(exercise.weight, exercise.weight_unit)} • {getExerciseEquipmentLabel(exercise.equipment)}
-                  </span>
-                </div>
-                <div className="day-view-weight">{formatExerciseWeight(exercise.weight, exercise.weight_unit)}</div>
-                <div className="day-view-meta">
-                  <span>{getExerciseEquipmentLabel(exercise.equipment)}</span>
-                </div>
-                {exercise.image_url ? (
-                  <div className="day-view-thumbnail-wrap">
-                    <img
-                      src={exercise.image_url}
-                      alt={exercise.name || `Exercise ${index + 1}`}
-                      className="day-view-thumbnail"
-                      onError={(event) => {
-                        debugLog('image-upload', 'Workout view thumbnail failed to render', {
-                          imageUrl: exercise.image_url,
-                          exerciseName: exercise.name,
-                        });
-                        event.currentTarget.style.display = 'none';
-                        if (event.currentTarget.parentElement) {
-                          event.currentTarget.parentElement.style.display = 'none';
-                        }
-                      }}
-                    />
+            {selectedDay.exercises.map((exercise, index) => {
+              console.log('IMAGE URL FROM FIRESTORE', exercise.image_url);
+              console.log('IMAGE URL PASSED TO COMPONENT', exercise.image_url);
+
+              return (
+                <label
+                  key={`${exercise.name || 'exercise'}-${index}`}
+                  className={`day-view-row ${exercise.completed ? 'day-view-row-complete' : ''}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={Boolean(exercise.completed)}
+                    onChange={(event) => handleToggleCompletion(index, event.target.checked)}
+                  />
+                  <div className="day-view-main">
+                    <strong className="day-view-name">{exercise.name || `Exercise ${index + 1}`}</strong>
+                    <span className="helper-text day-view-mobile-meta">
+                      {formatExerciseWeight(exercise.weight, exercise.weight_unit)} • {getExerciseEquipmentLabel(exercise.equipment)}
+                    </span>
                   </div>
-                ) : null}
-              </label>
-            ))}
+                  <div className="day-view-weight">{formatExerciseWeight(exercise.weight, exercise.weight_unit)}</div>
+                  <div className="day-view-meta">
+                    <span>{getExerciseEquipmentLabel(exercise.equipment)}</span>
+                  </div>
+                  {exercise.image_url ? (
+                    <div className="day-view-thumbnail-wrap">
+                      {console.log('IMAGE COMPONENT SRC', exercise.image_url)}
+                      <img
+                        src={exercise.image_url}
+                        alt={exercise.name || `Exercise ${index + 1}`}
+                        className="day-view-thumbnail"
+                        onError={(event) => {
+                          debugLog('image-upload', 'Workout view thumbnail failed to render', {
+                            imageUrl: exercise.image_url,
+                            exerciseName: exercise.name,
+                          });
+                          event.currentTarget.style.display = 'none';
+                          if (event.currentTarget.parentElement) {
+                            event.currentTarget.parentElement.style.display = 'none';
+                          }
+                        }}
+                      />
+                    </div>
+                  ) : null}
+                </label>
+              );
+            })}
           </div>
         )}
       </div>

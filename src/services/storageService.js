@@ -26,6 +26,12 @@ function createUploadError(code, message, cause) {
 
 async function verifyStorageBucket(debugContext = {}) {
   const storageBucket = String(storage.app.options.storageBucket || '').trim();
+  console.log('STORAGE LIST PROBE CALLER', {
+    component: debugContext?.component || 'unknown',
+    traceId: debugContext?.traceId || '',
+    exerciseName: debugContext?.exerciseName || '',
+    storageBucket,
+  });
 
   if (!storageBucket) {
     throw createUploadError(
@@ -37,6 +43,7 @@ async function verifyStorageBucket(debugContext = {}) {
   if (!bucketHealthPromise) {
     bucketHealthPromise = (async () => {
       const probeUrl = `https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o?maxResults=1`;
+      console.log('STORAGE LIST PROBE URL', probeUrl);
 
       debugLog('image-upload', 'Storage bucket health check starting', {
         ...debugContext,
