@@ -27,6 +27,9 @@ function serializeExerciseForSave(exercise, imageUrlOverride) {
 
   return {
     name: normalizedExercise.name || '',
+    exercise_id: normalizedExercise.exercise_id || '',
+    exercise_slug: normalizedExercise.exercise_slug || '',
+    library_status: normalizedExercise.library_status || '',
     type: normalizeExerciseType(normalizedExercise.type),
     equipment: normalizeExerciseEquipment(normalizedExercise.equipment),
     weight: Number(normalizedExercise.weight) || 0,

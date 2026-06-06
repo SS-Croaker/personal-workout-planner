@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import ExerciseEditor from '../components/ExerciseEditor';
+import { resolveExerciseReference } from '../services/exerciseLibraryService';
 import { useAuthStore } from '../store/authStore';
 import { useFeedbackStore } from '../store/feedbackStore';
 import { useWorkoutStore } from '../store/workoutStore';
@@ -208,7 +209,18 @@ export default function DayEditor() {
   const updateExerciseField = (index, field, value) => {
     setDraft((current) => {
       const exercises = current.exercises.map((exercise, exerciseIndex) =>
-        exerciseIndex === index ? { ...exercise, [field]: value } : exercise,
+        exerciseIndex === index
+          ? field === 'name' || field === 'equipment'
+            ? {
+                ...exercise,
+                [field]: value,
+                ...resolveExerciseReference(
+                  field === 'name' ? value : exercise.name,
+                  field === 'equipment' ? value : exercise.equipment,
+                ),
+              }
+            : { ...exercise, [field]: value }
+          : exercise,
       );
       return { ...current, exercises };
     });

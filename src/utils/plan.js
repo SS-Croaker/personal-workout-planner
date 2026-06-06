@@ -1,3 +1,5 @@
+import { resolveExerciseReference } from '../services/exerciseLibraryService';
+
 export const EXERCISE_TYPES = [
   { value: 'strength', label: 'Strength' },
   { value: 'cardio', label: 'Cardio' },
@@ -107,6 +109,9 @@ export function formatExerciseWeight(weight, weightUnit) {
 export function createEmptyExercise() {
   return {
     name: '',
+    exercise_id: '',
+    exercise_slug: '',
+    library_status: '',
     type: normalizeExerciseType('strength'),
     equipment: '',
     weight: '',
@@ -117,8 +122,14 @@ export function createEmptyExercise() {
 }
 
 export function normalizeExercise(exercise) {
+  const exerciseName = exercise?.name || '';
+  const exerciseReference = resolveExerciseReference(exerciseName, exercise?.equipment);
+
   return {
     ...exercise,
+    exercise_id: exerciseReference.exercise_id,
+    exercise_slug: exerciseReference.exercise_slug,
+    library_status: exerciseReference.library_status,
     type: normalizeExerciseType(exercise?.type),
     equipment: normalizeExerciseEquipment(exercise?.equipment),
     weight_unit: normalizeWeightUnit(exercise?.weight_unit),

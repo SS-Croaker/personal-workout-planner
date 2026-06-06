@@ -1231,7 +1231,7 @@ img {
 
 .day-view-row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 14px;
   align-items: center;
   padding: 16px 16px 16px 14px;
@@ -1252,6 +1252,19 @@ img {
   margin: 0;
   accent-color: var(--accent);
   filter: drop-shadow(0 0 8px rgba(46, 242, 179, 0.28));
+}
+
+.day-view-guide-trigger {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
 }
 
 .day-view-main {
@@ -1322,6 +1335,90 @@ img {
 
 .workout-exercises-panel {
   gap: 14px;
+}
+
+.exercise-guide-overlay {
+  align-items: stretch;
+  overflow-y: auto;
+}
+
+.exercise-guide-modal {
+  width: min(920px, calc(100vw - 24px));
+  margin: auto;
+  padding: 24px;
+  gap: 18px;
+}
+
+.exercise-guide-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.exercise-guide-close {
+  flex-shrink: 0;
+}
+
+.exercise-guide-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+  gap: 20px;
+}
+
+.exercise-guide-visual {
+  display: flex;
+  flex-direction: column;
+}
+
+.exercise-guide-image,
+.exercise-guide-image-placeholder {
+  width: 100%;
+  min-height: 240px;
+  border-radius: 22px;
+  border: 1px solid rgba(130, 198, 175, 0.16);
+  background: linear-gradient(180deg, rgba(12, 28, 23, 0.95), rgba(8, 20, 17, 0.86));
+  box-shadow: var(--shadow-soft);
+}
+
+.exercise-guide-image {
+  object-fit: cover;
+}
+
+.exercise-guide-image-placeholder {
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  text-align: center;
+}
+
+.exercise-guide-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.exercise-guide-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.exercise-guide-detail p {
+  margin: 0;
+}
+
+.exercise-guide-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.exercise-guide-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .exercise-entry {
@@ -1678,8 +1775,12 @@ img {
   }
 
   .day-view-row {
-    grid-template-columns: auto minmax(0, 1.5fr) auto auto auto;
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
+  }
+
+  .day-view-guide-trigger {
+    grid-template-columns: minmax(0, 1.5fr) auto auto auto;
   }
 
   .day-view-mobile-meta {
@@ -1696,6 +1797,10 @@ img {
     width: 62px;
     height: 62px;
     justify-self: end;
+  }
+
+  .exercise-guide-modal {
+    padding: 24px;
   }
 
   .progress-row {
@@ -1738,6 +1843,21 @@ img {
 }
 
 @media (max-width: 767px) {
+  .exercise-guide-modal {
+    width: min(100%, calc(100vw - 18px));
+    padding: 18px;
+  }
+
+  .exercise-guide-layout,
+  .exercise-guide-meta-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .exercise-guide-image,
+  .exercise-guide-image-placeholder {
+    min-height: 200px;
+  }
+
   .mobile-topbar {
     position: sticky;
     top: 0;
