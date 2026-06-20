@@ -12,6 +12,7 @@ import {
   WORKOUT_NAME_SUGGESTIONS,
 } from '../utils/plan';
 import { debugLog } from '../utils/debug';
+import { getFriendlyErrorMessage } from '../utils/errors';
 
 const COMMON_EXERCISES = [
   'Barbell Back Squat',
@@ -326,30 +327,16 @@ export default function DayEditor() {
     setSaving(true);
 
     try {
-      const saveResult = await saveWorkoutDay(user.uid, draft.day_number, draft.exercises, draft.title);
-      const uploadWarningCount = saveResult?.imageUploadWarnings?.length || 0;
+      await saveWorkoutDay(user.uid, draft.day_number, draft.exercises, draft.title);
 
-      if (uploadWarningCount > 0) {
-        const warningMessage =
-          uploadWarningCount === 1
-            ? `${normalizeWorkoutTitle(draft.title, draft.day_number)} was saved, but 1 image could not be attached.`
-            : `${normalizeWorkoutTitle(draft.title, draft.day_number)} was saved, but ${uploadWarningCount} images could not be attached.`;
-
-        showToast({
-          type: 'info',
-          message: warningMessage,
-          duration: 4200,
-        });
-      } else {
-        showToast({
-          type: 'success',
-          message: `${normalizeWorkoutTitle(draft.title, draft.day_number)} is saved and ready.`,
-        });
-      }
+      showToast({
+        type: 'success',
+        message: `${normalizeWorkoutTitle(draft.title, draft.day_number)} is saved and ready.`,
+      });
 
       navigate(`/day/${draft.day_number}`, { replace: true });
     } catch (saveError) {
-      const message = saveError.message || 'We couldn’t save your workout right now.';
+      const message = getFriendlyErrorMessage(saveError, 'We could not save your workout right now.');
       setError(message);
       showToast({
         type: 'error',

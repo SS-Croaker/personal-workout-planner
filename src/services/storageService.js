@@ -1,7 +1,6 @@
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { storage } from './firebase';
 import { MAX_UPLOAD_FILE_BYTES, getSupportedImageInfo } from '../utils/imageCompression';
-import { getFriendlyErrorMessage } from '../utils/errors';
 import { debugLog } from '../utils/debug';
 
 let bucketHealthPromise = null;
@@ -106,6 +105,9 @@ async function verifyStorageBucket(debugContext = {}) {
 }
 
 async function uploadOriginalImage(uid, dayNumber, exerciseName, file, debugContext = {}) {
+  // No bucket pre-flight: verifyStorageBucket was removed from this path because the
+  // Firebase SDK surfaces network/auth errors directly during uploadBytes/getDownloadURL.
+  // Errors propagate as-is with their .code intact and are mapped to friendly messages at the UI layer.
   const supportedImageInfo = getSupportedImageInfo(file);
 
   debugLog('image-upload', 'Raw upload validation starting', {
@@ -130,8 +132,6 @@ async function uploadOriginalImage(uid, dayNumber, exerciseName, file, debugCont
     error.code = 'upload/image-too-large';
     throw error;
   }
-
-  await verifyStorageBucket(debugContext);
 
   const imagePath = buildImagePath(uid, dayNumber, exerciseName, supportedImageInfo.extension);
   const imageRef = ref(storage, imagePath);
@@ -203,10 +203,7 @@ export const storageService = {
         message: error?.message,
         name: error?.name,
       });
-      const wrappedError = new Error(getFriendlyErrorMessage(error, 'We could not upload that image right now.'));
-      wrappedError.code = error?.code;
-      wrappedError.cause = error;
-      throw wrappedError;
+      throw error;
     }
   },
 
